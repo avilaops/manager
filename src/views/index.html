@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Compromissos - Windows Task Manager</title>
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Avx" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Calendário de Compromissos</h1>
+        <p class="subtitle">Sistema integrado com o Agendador de Tarefas do Windows</p>
+        
+        <div class="form-section">
+            <h2>Novo Compromisso</h2>
+            <form id="compromissoForm">
+                <div class="form-group">
+                    <label for="titulo">Título do Compromisso:</label>
+                    <input type="text" id="titulo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="descricao">Descrição:</label>
+                    <textarea id="descricao" rows="3"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="data">Data:</label>
+                        <input type="date" id="data" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hora">Hora:</label>
+                        <input type="time" id="hora" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lembrete">Lembrete antecipado (minutos):</label>
+                    <select id="lembrete">
+                        <option value="0">No horário</option>
+                        <option value="5">5 minutos antes</option>
+                        <option value="15" selected>15 minutos antes</option>
+                        <option value="30">30 minutos antes</option>
+                        <option value="60">1 hora antes</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary">Agendar no Windows</button>
+            </form>
+        </div>
+
+        <div class="lista-section">
+            <div class="header-lista">
+                <h2>Compromissos Agendados</h2>
+                <button type="button" class="btn-email" onclick="mostrarModalEmail()">
+                    📧 Enviar Resumo por Email
+                </button>
+            </div>
+            <div id="listaCompromissos"></div>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <!-- Modal de Email -->
+    <div id="modalEmail" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📧 Enviar Resumo por Email</h2>
+                <span class="close" onclick="fecharModalEmail()">&times;</span>
+            </div>
+            <form id="emailForm">
+                <div class="form-group">
+                    <label for="destinatario">Email do Destinatário:</label>
+                    <input type="email" id="destinatario" placeholder="exemplo@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Remetente:</label>
+                    <input type="text" value="nicolas@avila.inc" readonly class="readonly-input">
+                </div>
+
+                <div class="form-group">
+                    <label>Assunto:</label>
+                    <input type="text" id="assuntoEmail" value="Resumo de Compromissos - Calendário Windows" readonly class="readonly-input">
+                </div>
+
+                <div class="preview-section">
+                    <h3>Preview do Email:</h3>
+                    <div id="previewEmail" class="email-preview"></div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-secondary" onclick="fecharModalEmail()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Enviar Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>

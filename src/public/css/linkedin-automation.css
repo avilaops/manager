@@ -1,0 +1,251 @@
+/* LinkedIn Automation Section Styles */
+
+.linkedin-automation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.automation-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.automation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.automation-card h2 {
+    color: #667eea;
+    font-size: 22px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.automation-card p {
+    color: #64748b;
+    margin-bottom: 24px;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+.automation-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.automation-actions button {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.automation-actions .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.automation-actions .btn-primary:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.automation-actions .btn-secondary {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.automation-actions .btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+.automation-actions .btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.automation-actions .btn-danger:hover {
+    background: #dc2626;
+    transform: scale(1.02);
+}
+
+/* Status Section */
+.linkedin-status {
+    background: white;
+    padding: 28px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.linkedin-status h3 {
+    color: #667eea;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.status-item:last-child {
+    border-bottom: none;
+}
+
+.status-item span:first-child {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-success {
+    background: #10b981;
+    color: white;
+}
+
+.status-warning {
+    background: #fbbf24;
+    color: #78350f;
+}
+
+.status-info {
+    background: #3b82f6;
+    color: white;
+}
+
+/* Loading Spinner */
+.linkedin-loading {
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 16px;
+    margin-bottom: 24px;
+}
+
+.linkedin-loading .spinner {
+    border: 4px solid #f1f5f9;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.linkedin-loading p {
+    color: #667eea;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Console */
+.linkedin-console {
+    background: #1e293b;
+    color: #10b981;
+    padding: 24px;
+    border-radius: 16px;
+    font-family: 'Courier New', 'Consolas', monospace;
+    max-height: 320px;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.console-line {
+    margin-bottom: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    animation: fadeInConsole 0.3s ease-out;
+}
+
+@keyframes fadeInConsole {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.linkedin-console::-webkit-scrollbar {
+    width: 8px;
+}
+
+.linkedin-console::-webkit-scrollbar-track {
+    background: #0f172a;
+    border-radius: 10px;
+}
+
+.linkedin-console::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+
+.linkedin-console::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .linkedin-automation-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .automation-card {
+        padding: 20px;
+    }
+    
+    .automation-card h2 {
+        font-size: 19px;
+    }
+    
+    .linkedin-status,
+    .linkedin-console {
+        padding: 20px;
+    }
+}

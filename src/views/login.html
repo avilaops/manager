@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Avila Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card fade-in">
+            <div class="login-header">
+                <div class="login-logo">🚀</div>
+                <h1 class="login-title">Avila Dashboard</h1>
+                <p class="login-subtitle">Gerenciamento Unificado</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div id="loginError" class="login-error" style="display: none;"></div>
+
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        required 
+                        autocomplete="username"
+                        placeholder="Digite seu usuário"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="Digite sua senha"
+                    >
+                </div>
+
+                <button type="submit" id="loginBtn" class="btn-login">
+                    Entrar
+                </button>
+
+                <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 0.9em; color: #64748b;">
+                    <strong>🔑 Credenciais de Teste:</strong><br>
+                    Usuário: <code>admin</code><br>
+                    Senha: <code>admin123</code>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        // Limpa erro ao digitar
+        [usernameInput, passwordInput].forEach(input => {
+            input.addEventListener('input', () => {
+                loginError.style.display = 'none';
+            });
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!username || !password) {
+                showError('Por favor, preencha todos os campos');
+                return;
+            }
+
+            // Desabilita botão
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Entrando...';
+            loginError.style.display = 'none';
+
+            try {
+                const result = await AuthManager.login(username, password);
+
+                if (result.success) {
+                    UIUtils.showSuccess('Login realizado com sucesso!');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    showError(result.error || 'Credenciais inválidas');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Entrar';
+                }
+            } catch (error) {
+                showError('Erro ao conectar ao servidor');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Entrar';
+            }
+        });
+
+        function showError(message) {
+            loginError.textContent = message;
+            loginError.style.display = 'block';
+            loginError.classList.add('fade-in');
+        }
+
+        // Verifica se já está logado
+        if (AuthManager.isAuthenticated()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>
