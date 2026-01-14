@@ -26,10 +26,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Build frontend
         run: |
@@ -39,6 +38,7 @@ jobs:
           cp src/views/login.html dist/login.html
           cp src/views/cadastro.html dist/cadastro.html
           cp CNAME dist/CNAME
+          touch dist/.nojekyll
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
