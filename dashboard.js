@@ -2633,7 +2633,7 @@ async function loadCRMData() {
         
         // Botão para adicionar lead manualmente
         html += '<div style="margin-bottom: 20px;">';
-        html += '<button onclick="showAddLeadForm()" class="btn-primary" style="padding: 12px 24px;">➕ Adicionar Lead Manualmente</button>';
+        html += '<button onclick="openCadastroCompletoModal()" class="btn-primary" style="padding: 12px 24px;">➕ Adicionar Lead Manualmente</button>';
         html += '</div>';
         
         // Funil de vendas visual
