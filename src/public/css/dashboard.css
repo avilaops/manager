@@ -19,6 +19,57 @@
     --hover-bg: #f1f5f9;
 }
 
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    --dark-bg: #0f172a;
+    --sidebar-bg: #0f172a;
+    --card-bg: #1e293b;
+    --border-color: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --hover-bg: #334155;
+}
+
+[data-theme="dark"] body {
+    background: #0f172a;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .service-card,
+[data-theme="dark"] .stats-grid > div,
+[data-theme="dark"] .section {
+    background: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .top-navbar {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+[data-theme="dark"] .sidebar {
+    background: var(--sidebar-bg);
+}
+
+[data-theme="dark"] .nav-item:hover {
+    background: var(--hover-bg);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background: #334155;
+    border-color: #475569;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-primary {
+    background: var(--primary-color);
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: #475569;
+}
+
 body {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: #f8fafc;
@@ -106,18 +157,25 @@ body {
     position: absolute;
     top: 100%;
     left: 0;
-    margin-top: 8px;
+    margin-top: 0;
     background: white;
     min-width: 220px;
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     z-index: 1001;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateY(0px);
 }
 
-.dropdown:hover .dropdown-content {
+.dropdown:hover .dropdown-content,
+.dropdown-content:hover {
     display: block;
-    animation: fadeIn 0.2s ease;
+    pointer-events: auto;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .dropdown-content a {

@@ -883,38 +883,28 @@ function showLinkedInTab(tabName) {
 
 // Growth Tools Functions
 function runDailyRoutine() {
-    if (confirm('Isso vai executar a rotina diária do LinkedIn. Continuar?')) {
-        // Run the batch file
-        alert('Execute o arquivo LinkedIn_Daily_Routine.bat no diretório do projeto para iniciar a rotina automatizada.');
-    }
+    // Funcionalidade desabilitada por enquanto
+    console.log('Rotina diária do LinkedIn - em desenvolvimento');
 }
 
 function showEngagementTemplates() {
-    if (confirm('Isso vai mostrar os templates de comentários. Continuar?')) {
-        // Run the node script
-        alert('Execute: node linkedin-engagement.js templates');
-    }
+    // Funcionalidade desabilitada por enquanto
+    console.log('Templates de engagement - em desenvolvimento');
 }
 
 function showTodayTasks() {
-    if (confirm('Isso vai mostrar as tarefas de hoje. Continuar?')) {
-        // Run the node script
-        alert('Execute: node linkedin-engagement.js today');
-    }
+    // Funcionalidade desabilitada por enquanto
+    console.log('Tarefas do dia - em desenvolvimento');
 }
 
 function openGrowthMenu() {
-    if (confirm('Isso vai abrir o menu de crescimento. Continuar?')) {
-        // Run the batch file
-        alert('Execute o arquivo LinkedIn_Growth_Menu.bat no diretório do projeto.');
-    }
+    // Funcionalidade desabilitada por enquanto
+    console.log('Menu de crescimento - em desenvolvimento');
 }
 
 function openDailyChecklist() {
-    if (confirm('Isso vai abrir o checklist diário. Continuar?')) {
-        // Open the markdown file
-        alert('Abra o arquivo DAILY_CHECKLIST.md no diretório do projeto para ver o checklist.');
-    }
+    // Funcionalidade desabilitada por enquanto
+    console.log('Checklist diário - em desenvolvimento');
 }
 
 // ============================================
@@ -1325,6 +1315,7 @@ function carregarCompromissos() {
     let html = '';
     compromissos.forEach((comp, index) => {
         const dataFormatada = new Date(comp.data + 'T' + comp.hora).toLocaleString('pt-BR');
+        const linkIcon = comp.linkReuniao ? `<a href="${comp.linkReuniao}" target="_blank" style="margin-left: 10px; color: #3b82f6; text-decoration: none;">🔗 Link</a>` : '';
         html += `
             <div class="service-card">
                 <div class="service-header">
@@ -1332,10 +1323,10 @@ function carregarCompromissos() {
                         <div class="service-title">${comp.titulo}</div>
                         <p style="color: #64748b; margin-top: 5px;">${comp.descricao || 'Sem descrição'}</p>
                     </div>
-                    <span class="service-status status-active">⏰ ${dataFormatada}</span>
+                    <span class="service-status status-active">⏰ ${dataFormatada} ${linkIcon}</span>
                 </div>
-                <button onclick="removerCompromisso(${index})" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
-                    🗑️ Remover
+                <button onclick="removerCompromisso(${index})" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2em;" title="Remover">
+                    🗑️
                 </button>
             </div>
         `;
@@ -1344,50 +1335,49 @@ function carregarCompromissos() {
     container.innerHTML = html;
 }
 
-function agendarCompromisso() {
+async function agendarCompromisso() {
     const titulo = document.getElementById('titulo').value;
     const descricao = document.getElementById('descricao').value;
     const data = document.getElementById('data').value;
     const hora = document.getElementById('hora').value;
     const lembrete = document.getElementById('lembrete').value;
+    const linkReuniao = document.getElementById('linkReuniao').value;
     
-    // Salvar no localStorage
-    const compromissos = JSON.parse(localStorage.getItem('compromissos') || '[]');
-    compromissos.push({ titulo, descricao, data, hora, lembrete });
-    localStorage.setItem('compromissos', JSON.stringify(compromissos));
+    if (!titulo || !data || !hora) {
+        alert('❌ Preencha título, data e hora!');
+        return;
+    }
     
-    // Criar script PowerShell para Windows Task Scheduler
-    const dataHora = new Date(data + 'T' + hora);
-    const dataNotificacao = new Date(dataHora.getTime() - lembrete * 60000);
-    
-    const script = `
-# Script de agendamento de compromisso
-$taskName = "Compromisso_${titulo.replace(/[^a-zA-Z0-9]/g, '_')}"
-$action = New-ScheduledTaskAction -Execute "msg" -Argument "* /TIME:0 'COMPROMISSO: ${titulo} - ${descricao}'"
-$trigger = New-ScheduledTaskTrigger -Once -At "${dataNotificacao.toISOString()}"
-$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Force
-Write-Host "Compromisso agendado com sucesso no Windows Task Scheduler!"
-Write-Host "Nome da tarefa: $taskName"
-Write-Host "Data/Hora: ${dataHora.toLocaleString('pt-BR')}"
-`;
-    
-    // Download do script
-    const blob = new Blob([script], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `agendar_${titulo.replace(/[^a-zA-Z0-9]/g, '_')}.ps1`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    
-    // Limpar formulário
-    document.getElementById('calendar-form').reset();
-    
-    // Recarregar lista
-    carregarCompromissos();
-    
-    alert('✅ Compromisso salvo! Execute o arquivo .ps1 baixado para agendar no Windows Task Scheduler.');
+    try {
+        // Enviar para o backend agendar automaticamente
+        const response = await fetch('http://localhost:3000/api/calendar/schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ titulo, descricao, data, hora, lembrete, linkReuniao })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(result.message);
+            
+            // Salvar também no localStorage
+            const compromissos = JSON.parse(localStorage.getItem('compromissos') || '[]');
+            compromissos.push({ titulo, descricao, data, hora, lembrete, linkReuniao });
+            localStorage.setItem('compromissos', JSON.stringify(compromissos));
+            
+            // Limpar formulário
+            document.getElementById('calendar-form').reset();
+            
+            // Recarregar lista
+            carregarCompromissos();
+        } else {
+            alert('❌ Erro ao agendar: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Erro ao agendar:', error);
+        alert('❌ Erro ao conectar com o servidor!');
+    }
 }
 
 function removerCompromisso(index) {
@@ -2588,7 +2578,7 @@ async function loadCRMData() {
         
         // Botão para adicionar lead manualmente
         html += '<div style="margin-bottom: 20px;">';
-        html += '<button onclick="showAddLeadForm()" class="btn-primary" style="padding: 12px 24px;">➕ Adicionar Lead Manualmente</button>';
+        html += '<button onclick="openCadastroCompletoModal()" class="btn-primary" style="padding: 12px 24px;">➕ Adicionar Lead Manualmente</button>';
         html += '</div>';
         
         // Funil de vendas visual
@@ -2780,6 +2770,495 @@ async function deleteLead(leadId) {
     } catch (error) {
         alert('❌ Erro: ' + error.message);
     }
+}
+
+// Visualizar provisionamento do cliente
+async function viewClientProvision(leadId) {
+    try {
+        const response = await fetch(`${API_BASE}/crm/leads/${leadId}`);
+        const data = await response.json();
+        
+        if (!data.success) throw new Error(data.error);
+        
+        const lead = data.lead;
+        const provision = lead.provisionamento || {};
+        
+        let html = `
+            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 700px; margin: 20px auto;">
+                <h2 style="margin-bottom: 25px; color: #1e293b;">🔍 Provisionamento do Cliente</h2>
+                
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #475569; margin-bottom: 15px;">📋 Informações do Cliente</h3>
+                    <p><strong>Nome:</strong> ${lead.nome}</p>
+                    <p><strong>Email:</strong> ${lead.email}</p>
+                    <p><strong>Empresa:</strong> ${lead.empresa || 'Não informado'}</p>
+                    <p><strong>Status:</strong> ${lead.status}</p>
+                </div>
+                
+                ${provision.github ? `
+                    <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+                        <h3 style="color: #166534; margin-bottom: 15px;">✅ GitHub Repository</h3>
+                        <p><strong>Repositório:</strong> <a href="${provision.github.url}" target="_blank" style="color: #3b82f6;">${provision.github.name}</a></p>
+                        <p><strong>GitHub Pages:</strong> <a href="${provision.github.pagesUrl}" target="_blank" style="color: #3b82f6;">${provision.github.pagesUrl}</a></p>
+                        <p><strong>Criado em:</strong> ${new Date(provision.github.criadoEm).toLocaleString('pt-BR')}</p>
+                    </div>
+                ` : ''}
+                
+                ${provision.mongodb ? `
+                    <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #059669;">
+                        <h3 style="color: #166534; margin-bottom: 15px;">✅ MongoDB Database</h3>
+                        <p><strong>Database:</strong> ${provision.mongodb.database}</p>
+                        <p><strong>Collection:</strong> ${provision.mongodb.collection}</p>
+                        <p><strong>Connection String:</strong> <code style="background: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">${provision.mongodb.uri ? '***hidden***' : 'Não configurado'}</code></p>
+                    </div>
+                ` : ''}
+                
+                ${provision.railway ? `
+                    <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0ea5e9;">
+                        <h3 style="color: #075985; margin-bottom: 15px;">✅ Railway Deployment</h3>
+                        <p><strong>Projeto:</strong> ${provision.railway.projectName}</p>
+                        <p><strong>URL:</strong> <a href="${provision.railway.url}" target="_blank" style="color: #3b82f6;">${provision.railway.url}</a></p>
+                        <p><strong>Status:</strong> ${provision.railway.status}</p>
+                    </div>
+                ` : ''}
+                
+                ${!provision.github && !provision.mongodb && !provision.railway ? `
+                    <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <h3 style="color: #92400e; margin-bottom: 10px;">⚠️ Provisionamento Pendente</h3>
+                        <p style="color: #78350f;">Este cliente ainda não foi provisionado. Clique em "Fechar Venda & Provisionar" para iniciar o processo automático.</p>
+                    </div>
+                ` : ''}
+                
+                <button onclick="this.parentElement.remove()" class="btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;">
+                    Fechar
+                </button>
+            </div>
+        `;
+        
+        // Criar modal
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto; padding: 20px;';
+        modal.innerHTML = html;
+        modal.onclick = (e) => {
+            if (e.target === modal) modal.remove();
+        };
+        document.body.appendChild(modal);
+        
+    } catch (error) {
+        alert('❌ Erro ao carregar provisionamento: ' + error.message);
+    }
+}
+
+// ============================================
+// LIGHTROOM INSPECTOR - Sistema de Inspeção
+// ============================================
+
+async function runSystemInspection() {
+    const resultsDiv = document.getElementById('inspection-results');
+    const placeholderDiv = document.getElementById('inspection-placeholder');
+    
+    // Esconder placeholder e mostrar loading
+    placeholderDiv.style.display = 'none';
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div class="loading"></div>
+            <p style="color: #64748b; margin-top: 20px;">Escaneando sistema... Isso pode levar alguns segundos.</p>
+        </div>
+    `;
+    
+    // Simular delay para análise
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Executar todas as verificações
+    const results = {
+        errors: await checkJavaScriptErrors(),
+        endpoints: await checkEndpoints(),
+        performance: await checkPerformance(),
+        ui: await checkUIIssues(),
+        security: await checkSecurity(),
+        improvements: await suggestImprovements()
+    };
+    
+    // Renderizar resultados
+    renderInspectionResults(results);
+}
+
+async function checkJavaScriptErrors() {
+    const errors = [];
+    
+    // Verificar funções não definidas
+    const undefinedFunctions = [];
+    const allScripts = Array.from(document.querySelectorAll('script')).map(s => s.innerHTML);
+    
+    // Capturar erros do console
+    const originalError = console.error;
+    const capturedErrors = [];
+    console.error = (...args) => {
+        capturedErrors.push(args.join(' '));
+        originalError.apply(console, args);
+    };
+    
+    return {
+        count: capturedErrors.length,
+        items: capturedErrors.slice(0, 5),
+        severity: capturedErrors.length > 0 ? 'error' : 'success'
+    };
+}
+
+async function checkEndpoints() {
+    const endpoints = [
+        { name: 'CRM Leads', url: '/api/crm/leads' },
+        { name: 'CRM Contacts', url: '/api/crm/contacts' },
+        { name: 'Calendar Schedule', url: '/api/calendar/schedule' },
+        { name: 'GitHub Repos', url: '/api/github/repos' },
+        { name: 'MongoDB Databases', url: '/api/mongodb/databases' }
+    ];
+    
+    const results = [];
+    
+    for (const endpoint of endpoints) {
+        try {
+            const response = await fetch(`${API_BASE}${endpoint.url}`);
+            results.push({
+                name: endpoint.name,
+                url: endpoint.url,
+                status: response.ok ? 'online' : 'offline',
+                statusCode: response.status
+            });
+        } catch (error) {
+            results.push({
+                name: endpoint.name,
+                url: endpoint.url,
+                status: 'error',
+                error: error.message
+            });
+        }
+    }
+    
+    const online = results.filter(r => r.status === 'online').length;
+    const total = results.length;
+    
+    return {
+        count: online,
+        total: total,
+        items: results,
+        severity: online === total ? 'success' : (online > total / 2 ? 'warning' : 'error')
+    };
+}
+
+async function checkPerformance() {
+    const issues = [];
+    
+    // Verificar tamanho do DOM
+    const domSize = document.querySelectorAll('*').length;
+    if (domSize > 1500) {
+        issues.push({ type: 'DOM grande', value: `${domSize} elementos`, recommendation: 'Considere lazy loading ou virtualização' });
+    }
+    
+    // Verificar imagens sem lazy loading
+    const images = document.querySelectorAll('img:not([loading="lazy"])');
+    if (images.length > 10) {
+        issues.push({ type: 'Imagens sem lazy loading', value: `${images.length} imagens`, recommendation: 'Adicione loading="lazy" nas imagens' });
+    }
+    
+    // Verificar scripts inline
+    const inlineScripts = document.querySelectorAll('script:not([src])');
+    if (inlineScripts.length > 5) {
+        issues.push({ type: 'Muitos scripts inline', value: `${inlineScripts.length} scripts`, recommendation: 'Consolide scripts em arquivos externos' });
+    }
+    
+    // Verificar localStorage
+    const localStorageSize = JSON.stringify(localStorage).length;
+    if (localStorageSize > 5 * 1024 * 1024) {
+        issues.push({ type: 'localStorage grande', value: `${(localStorageSize / 1024 / 1024).toFixed(2)} MB`, recommendation: 'Limpe dados antigos do localStorage' });
+    }
+    
+    return {
+        count: issues.length,
+        items: issues,
+        severity: issues.length === 0 ? 'success' : (issues.length < 3 ? 'warning' : 'error')
+    };
+}
+
+async function checkUIIssues() {
+    const issues = [];
+    
+    // Verificar contraste de cores
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach((btn, idx) => {
+        if (idx < 3) { // Apenas primeiros 3 para exemplo
+            const bgColor = window.getComputedStyle(btn).backgroundColor;
+            const color = window.getComputedStyle(btn).color;
+            // Simplificado - em produção usaria algoritmo WCAG
+            if (bgColor === color) {
+                issues.push({ type: 'Contraste baixo', element: btn.textContent?.slice(0, 30), recommendation: 'Ajuste cores para melhor legibilidade' });
+            }
+        }
+    });
+    
+    // Verificar botões sem title/aria-label
+    const buttonsWithoutLabel = document.querySelectorAll('button:not([title]):not([aria-label])');
+    if (buttonsWithoutLabel.length > 5) {
+        issues.push({ type: 'Acessibilidade', value: `${buttonsWithoutLabel.length} botões sem labels`, recommendation: 'Adicione title ou aria-label para leitores de tela' });
+    }
+    
+    // Verificar inputs sem labels
+    const inputsWithoutLabel = document.querySelectorAll('input:not([aria-label]):not([id])');
+    if (inputsWithoutLabel.length > 0) {
+        issues.push({ type: 'Formulários', value: `${inputsWithoutLabel.length} inputs sem label`, recommendation: 'Associe labels aos inputs para acessibilidade' });
+    }
+    
+    return {
+        count: issues.length,
+        items: issues,
+        severity: issues.length === 0 ? 'success' : (issues.length < 3 ? 'warning' : 'error')
+    };
+}
+
+async function checkSecurity() {
+    const issues = [];
+    
+    // Verificar links externos sem rel="noopener"
+    const externalLinks = document.querySelectorAll('a[target="_blank"]:not([rel*="noopener"])');
+    if (externalLinks.length > 0) {
+        issues.push({ type: 'Links externos', value: `${externalLinks.length} links`, recommendation: 'Adicione rel="noopener noreferrer" para segurança' });
+    }
+    
+    // Verificar se tem HTTPS
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        issues.push({ type: 'Protocolo HTTP', value: 'Sem HTTPS', recommendation: 'Configure SSL/TLS para conexões seguras' });
+    }
+    
+    // Verificar tokens expostos no código
+    const scripts = Array.from(document.querySelectorAll('script')).map(s => s.innerHTML).join('');
+    if (scripts.includes('sk_') || scripts.includes('pk_test') || scripts.includes('ghp_')) {
+        issues.push({ type: 'Token exposto', value: 'Possível token no código', recommendation: 'Use variáveis de ambiente para tokens sensíveis' });
+    }
+    
+    return {
+        count: issues.length,
+        items: issues,
+        severity: issues.length === 0 ? 'success' : (issues.length < 2 ? 'warning' : 'error')
+    };
+}
+
+async function suggestImprovements() {
+    const suggestions = [];
+    
+    // Verificar se tem Service Worker
+    if (!('serviceWorker' in navigator)) {
+        suggestions.push({ 
+            type: 'PWA', 
+            title: 'Progressive Web App', 
+            description: 'Adicione Service Worker para funcionalidade offline e melhor performance',
+            priority: 'medium'
+        });
+    }
+    
+    // Verificar cache do navegador
+    if (!document.querySelector('meta[http-equiv="cache-control"]')) {
+        suggestions.push({ 
+            type: 'Cache', 
+            title: 'Otimização de Cache', 
+            description: 'Configure cache headers para melhorar velocidade de carregamento',
+            priority: 'low'
+        });
+    }
+    
+    // Sugerir dark mode
+    if (!document.querySelector('[data-theme]') && !localStorage.getItem('theme')) {
+        suggestions.push({ 
+            type: 'UI/UX', 
+            title: 'Modo Escuro', 
+            description: 'Implemente theme switcher para dark mode',
+            priority: 'medium'
+        });
+    }
+    
+    // Sugerir lazy loading para imagens
+    const imagesCount = document.querySelectorAll('img').length;
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]').length;
+    if (imagesCount > 10 && lazyImages < imagesCount * 0.5) {
+        suggestions.push({ 
+            type: 'Performance', 
+            title: 'Lazy Loading de Imagens', 
+            description: `${imagesCount - lazyImages} imagens poderiam usar lazy loading`,
+            priority: 'high'
+        });
+    }
+    
+    // Sugerir minificação
+    suggestions.push({ 
+        type: 'Build', 
+        title: 'Minificação de Assets', 
+        description: 'Configure build pipeline para minificar JS/CSS em produção',
+        priority: 'medium'
+    });
+    
+    // Sugerir analytics
+    if (!window.gtag && !window._paq) {
+        suggestions.push({ 
+            type: 'Analytics', 
+            title: 'Monitoramento de Usuários', 
+            description: 'Adicione Google Analytics ou alternativa para insights de uso',
+            priority: 'low'
+        });
+    }
+    
+    return {
+        count: suggestions.length,
+        items: suggestions
+    };
+}
+
+function renderInspectionResults(results) {
+    const resultsDiv = document.getElementById('inspection-results');
+    
+    const severityColors = {
+        success: '#10b981',
+        warning: '#f59e0b',
+        error: '#ef4444'
+    };
+    
+    const severityIcons = {
+        success: '✅',
+        warning: '⚠️',
+        error: '❌'
+    };
+    
+    let html = `
+        <div style="margin-bottom: 30px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                <div class="service-card" style="border-left: 4px solid ${severityColors[results.errors.severity]};">
+                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">ERROS JS</h4>
+                    <div style="font-size: 2em;">${severityIcons[results.errors.severity]}</div>
+                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.errors.count}</p>
+                </div>
+                
+                <div class="service-card" style="border-left: 4px solid ${severityColors[results.endpoints.severity]};">
+                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">ENDPOINTS</h4>
+                    <div style="font-size: 2em;">${severityIcons[results.endpoints.severity]}</div>
+                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.endpoints.count}/${results.endpoints.total}</p>
+                </div>
+                
+                <div class="service-card" style="border-left: 4px solid ${severityColors[results.performance.severity]};">
+                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">PERFORMANCE</h4>
+                    <div style="font-size: 2em;">${severityIcons[results.performance.severity]}</div>
+                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.performance.count} problemas</p>
+                </div>
+                
+                <div class="service-card" style="border-left: 4px solid ${severityColors[results.ui.severity]};">
+                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">UI/UX</h4>
+                    <div style="font-size: 2em;">${severityIcons[results.ui.severity]}</div>
+                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.ui.count} problemas</p>
+                </div>
+                
+                <div class="service-card" style="border-left: 4px solid ${severityColors[results.security.severity]};">
+                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">SEGURANÇA</h4>
+                    <div style="font-size: 2em;">${severityIcons[results.security.severity]}</div>
+                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.security.count} problemas</p>
+                </div>
+                
+                <div class="service-card" style="border-left: 4px solid #3b82f6;">
+                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">MELHORIAS</h4>
+                    <div style="font-size: 2em;">💡</div>
+                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.improvements.count} sugestões</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Detalhes dos Endpoints -->
+        <div class="service-card" style="margin-bottom: 20px;">
+            <h3 style="margin-bottom: 15px;">🔌 Status dos Endpoints</h3>
+            <div style="display: grid; gap: 10px;">
+                ${results.endpoints.items.map(endpoint => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${endpoint.status === 'online' ? '#f0fdf4' : '#fef2f2'}; border-radius: 6px;">
+                        <div>
+                            <strong>${endpoint.name}</strong>
+                            <p style="color: #64748b; font-size: 0.85em; margin-top: 4px;">${endpoint.url}</p>
+                        </div>
+                        <span style="background: ${endpoint.status === 'online' ? '#10b981' : '#ef4444'}; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.85em;">
+                            ${endpoint.status === 'online' ? '✅ Online' : '❌ Offline'}
+                        </span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        
+        <!-- Problemas de Performance -->
+        ${results.performance.count > 0 ? `
+            <div class="service-card" style="margin-bottom: 20px; border-left: 4px solid ${severityColors[results.performance.severity]};">
+                <h3 style="margin-bottom: 15px;">⚡ Problemas de Performance</h3>
+                ${results.performance.items.map(issue => `
+                    <div style="padding: 12px; background: #fef3c7; border-radius: 6px; margin-bottom: 10px;">
+                        <strong style="color: #92400e;">${issue.type}</strong>
+                        <p style="color: #78350f; margin: 5px 0;">${issue.value}</p>
+                        <p style="color: #64748b; font-size: 0.85em;">💡 ${issue.recommendation}</p>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+        
+        <!-- Problemas de UI/UX -->
+        ${results.ui.count > 0 ? `
+            <div class="service-card" style="margin-bottom: 20px; border-left: 4px solid ${severityColors[results.ui.severity]};">
+                <h3 style="margin-bottom: 15px;">🎨 Problemas de UI/UX</h3>
+                ${results.ui.items.map(issue => `
+                    <div style="padding: 12px; background: #fef3c7; border-radius: 6px; margin-bottom: 10px;">
+                        <strong style="color: #92400e;">${issue.type}</strong>
+                        <p style="color: #78350f; margin: 5px 0;">${issue.value || issue.element || ''}</p>
+                        <p style="color: #64748b; font-size: 0.85em;">💡 ${issue.recommendation}</p>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+        
+        <!-- Problemas de Segurança -->
+        ${results.security.count > 0 ? `
+            <div class="service-card" style="margin-bottom: 20px; border-left: 4px solid ${severityColors[results.security.severity]};">
+                <h3 style="margin-bottom: 15px;">🔒 Problemas de Segurança</h3>
+                ${results.security.items.map(issue => `
+                    <div style="padding: 12px; background: #fee2e2; border-radius: 6px; margin-bottom: 10px;">
+                        <strong style="color: #991b1b;">${issue.type}</strong>
+                        <p style="color: #7f1d1d; margin: 5px 0;">${issue.value}</p>
+                        <p style="color: #64748b; font-size: 0.85em;">💡 ${issue.recommendation}</p>
+                    </div>
+                `).join('')}
+            </div>
+        ` : ''}
+        
+        <!-- Sugestões de Melhorias -->
+        <div class="service-card" style="border-left: 4px solid #3b82f6;">
+            <h3 style="margin-bottom: 15px;">💡 Sugestões de Melhorias</h3>
+            <div style="display: grid; gap: 10px;">
+                ${results.improvements.items.map(suggestion => {
+                    const priorityColors = { high: '#ef4444', medium: '#f59e0b', low: '#10b981' };
+                    const priorityLabels = { high: 'Alta', medium: 'Média', low: 'Baixa' };
+                    return `
+                        <div style="padding: 15px; background: #f8fafc; border-radius: 6px; border-left: 3px solid ${priorityColors[suggestion.priority]};">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <strong style="color: #1e293b;">${suggestion.title}</strong>
+                                <span style="background: ${priorityColors[suggestion.priority]}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75em;">
+                                    ${priorityLabels[suggestion.priority]}
+                                </span>
+                            </div>
+                            <p style="color: #475569; font-size: 0.9em;">${suggestion.description}</p>
+                            <p style="color: #94a3b8; font-size: 0.8em; margin-top: 5px;">Categoria: ${suggestion.type}</p>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+            <button onclick="runSystemInspection()" class="btn-primary" style="padding: 14px 32px;">
+                🔄 Escanear Novamente
+            </button>
+        </div>
+    `;
+    
+    resultsDiv.innerHTML = html;
 }
 
 // ============================================
@@ -4185,3 +4664,12 @@ function deleteAccount() {
 
 // Expose notification function globally for E-Reader
 window.addNotification = addNotification;
+
+// ============================================
+// CADASTRO COMPLETO MODAL
+// ============================================
+
+function openCadastroCompletoModal() {
+    // Abrir a página de cadastro em uma nova aba
+    window.open('/cadastro.html', '_blank');
+}

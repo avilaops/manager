@@ -1,8 +1,12 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="public, max-age=31536000">
+    <meta http-equiv="expires" content="31536000">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="Sistema completo de gerenciamento pessoal e empresarial">
     <title>Avila Dashboard - Gerenciamento Unificado</title>
     <link rel="stylesheet" href="/css/dashboard.css">
     <link rel="stylesheet" href="/css/notifications-settings.css">
@@ -11,7 +15,16 @@
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Avx" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
 </head>
 <body>
     <!-- Top Navigation Bar -->
@@ -385,11 +398,18 @@
                     <span class="icon">🧠</span> AI & ML Tools
                 </a>
             </div>
+
+            <div class="nav-section">
+                <h3>🔍 Diagnóstico</h3>
+                <a href="#lightroom" class="nav-item" onclick="showSection('lightroom')">
+                    <span class="icon">🔬</span> Lightroom Inspector
+                </a>
+            </div>
         </nav>
 
         <div class="sidebar-footer">
             <p>© 2026 Avila Inc</p>
-            <a href="https://avila.inc" target="_blank">avila.inc</a>
+            <a href="https://avila.inc" target="_blank" rel="noopener noreferrer">avila.inc</a>
         </div>
     </div>
 
@@ -402,8 +422,11 @@
                 <p id="page-subtitle">Visão geral de todos os serviços</p>
             </div>
             <div class="header-right">
+                <button id="theme-toggle" onclick="toggleTheme()" style="background: none; border: none; font-size: 1.5em; cursor: pointer; margin-right: 20px; padding: 8px;" title="Alternar tema">
+                    🌙
+                </button>
                 <div class="user-info">
-                    <img src="https://www.gravatar.com/avatar/6711" alt="Avatar" class="avatar">
+                    <img src="https://www.gravatar.com/avatar/6711" alt="Avatar" class="avatar" loading="lazy">
                     <div>
                         <p class="user-name">Nicolas Rosa</p>
                         <p class="user-role">Administrator</p>
@@ -467,6 +490,10 @@
                 <div class="quick-actions">
                     <h2>⚡ Ações Rápidas</h2>
                     <div class="actions-grid">
+                        <button class="action-btn" onclick="openCadastroCompletoModal()">
+                            <span class="icon">👤</span>
+                            <span>Cadastrar Cliente</span>
+                        </button>
                         <button class="action-btn" onclick="navigateToSection('github')">
                             <span class="icon">🐙</span>
                             <span>Ver Repositórios</span>
@@ -497,85 +524,26 @@
                 <div class="links-section">
                     <h2>🔗 Links Rápidos</h2>
                     <div class="links-grid">
-                        <a href="https://avila.inc" target="_blank" class="link-card">
+                        <a href="https://avila.inc" target="_blank" rel="noopener noreferrer" class="link-card">
                             <span class="icon">🌐</span>
                             <span>Avila Soluções</span>
                         </a>
-                        <a href="https://avilaops.com" target="_blank" class="link-card">
+                        <a href="https://avilaops.com" target="_blank" rel="noopener noreferrer" class="link-card">
                             <span class="icon">💻</span>
                             <span>Avila Development</span>
                         </a>
-                        <a href="https://docs.avila.inc" target="_blank" class="link-card">
+                        <a href="https://docs.avila.inc" target="_blank" rel="noopener noreferrer" class="link-card">
                             <span class="icon">📚</span>
                             <span>Documentação</span>
                         </a>
-                        <a href="https://support.avila.inc" target="_blank" class="link-card">
+                        <a href="https://support.avila.inc" target="_blank" rel="noopener noreferrer" class="link-card">
                             <span class="icon">🎧</span>
                             <span>Suporte Técnico</span>
                         </a>
-                        <a href="https://linkedin.com/company/avila-devops" target="_blank" class="link-card">
+                        <a href="https://linkedin.com/company/avila-devops" target="_blank" rel="noopener noreferrer" class="link-card">
                             <span class="icon">💼</span>
                             <span>LinkedIn</span>
                         </a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Calendário Section -->
-            <section id="section-calendario" class="section">
-                <div class="section-header">
-                    <h2>📅 Calendário de Compromissos</h2>
-                </div>
-                <div class="service-card">
-                    <form id="calendar-form" style="display: grid; gap: 20px;">
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Título do Compromisso:</label>
-                            <input type="text" id="titulo" placeholder="Ex: Reunião com cliente" required
-                                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Descrição:</label>
-                            <textarea id="descricao" rows="4" placeholder="Detalhes do compromisso..."
-                                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em; resize: vertical;"></textarea>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div>
-                                <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Data:</label>
-                                <input type="date" id="data" required
-                                    style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
-                            </div>
-                            <div>
-                                <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Hora:</label>
-                                <input type="time" id="hora" required
-                                    style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
-                            </div>
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Lembrete:</label>
-                            <select id="lembrete"
-                                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
-                                <option value="0">No momento do compromisso</option>
-                                <option value="15">15 minutos antes</option>
-                                <option value="30">30 minutos antes</option>
-                                <option value="60">1 hora antes</option>
-                                <option value="1440">1 dia antes</option>
-                            </select>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <button type="submit" class="btn-primary" style="padding: 14px; font-size: 1.1em;">
-                                ⏰ Agendar no Windows
-                            </button>
-                            <button type="button" onclick="enviarEmailCompromisso()" class="btn-primary" style="padding: 14px; font-size: 1.1em; background: #10b981;">
-                                ✉️ Enviar Email
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                
-                <div style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 15px;">📋 Compromissos Salvos</h3>
-                    <div id="lista-compromissos" class="stats-grid">
-                        <!-- Lista de compromissos será carregada aqui -->
                     </div>
                 </div>
             </section>
@@ -740,6 +708,12 @@
                             <textarea id="descricao" rows="4" placeholder="Detalhes do compromisso..."
                                 style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em; resize: vertical;"></textarea>
                         </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">🔗 Link da Reunião (opcional):</label>
+                            <input type="url" id="linkReuniao" placeholder="https://meet.google.com/abc-defg-hij"
+                                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
+                            <small style="color: #94a3b8; margin-top: 4px; display: block;">Google Meet, Zoom, Teams, etc. - Abrirá automaticamente no horário!</small>
+                        </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div>
                                 <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Data:</label>
@@ -763,12 +737,12 @@
                                 <option value="1440">1 dia antes</option>
                             </select>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <button type="submit" class="btn-primary" style="padding: 14px; font-size: 1.1em;">
-                                ⏰ Agendar no Windows
+                        <div style="display: flex; gap: 0;">
+                            <button type="submit" class="btn-primary" style="padding: 14px; font-size: 1.5em; flex: 1; border-radius: 8px 0 0 8px;" title="Agendar no Windows">
+                                ⏰
                             </button>
-                            <button type="button" onclick="enviarEmailCompromisso()" class="btn-primary" style="padding: 14px; font-size: 1.1em; background: #10b981;">
-                                ✉️ Enviar Email
+                            <button type="button" onclick="enviarEmailCompromisso()" class="btn-primary" style="padding: 14px; font-size: 1.5em; flex: 1; background: #10b981; border-radius: 0 8px 8px 0; border-left: 2px solid rgba(255,255,255,0.2);" title="Enviar Email">
+                                ✉️
                             </button>
                         </div>
                     </form>
@@ -790,6 +764,29 @@
                 </div>
                 <div id="mongodb-content" class="loading">
                     <p>Carregando databases do MongoDB Atlas...</p>
+                </div>
+            </section>
+
+            <!-- Lightroom Inspector Section -->
+            <section id="section-lightroom" class="section">
+                <div class="section-header">
+                    <h2>🔬 Lightroom Inspector</h2>
+                    <button class="btn-primary" onclick="runSystemInspection()">🔍 Escanear Sistema</button>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px; color: white; margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 10px; font-size: 1.5em;">🎯 Análise Completa do Sistema</h3>
+                    <p style="opacity: 0.9;">Detecta defeitos, erros, problemas de performance e sugere melhorias em tempo real.</p>
+                </div>
+                
+                <div id="inspection-results" style="display: none;">
+                    <!-- Resultados da inspeção -->
+                </div>
+                
+                <div id="inspection-placeholder" style="text-align: center; padding: 60px 20px; color: #64748b;">
+                    <div style="font-size: 4em; margin-bottom: 20px;">🔬</div>
+                    <h3 style="color: #475569; margin-bottom: 10px;">Pronto para Inspeção</h3>
+                    <p>Clique em "Escanear Sistema" para iniciar a análise completa</p>
                 </div>
             </section>
 
@@ -1026,13 +1023,17 @@ Use hashtags para maior alcance!
                     <p>Gerencie seus leads, contatos e pipeline de vendas</p>
                 </div>
 
-                <div class="crm-tabs">
+                <div id="crm-content">
+                    <!-- Conteúdo do CRM será carregado aqui -->
+                </div>
+
+                <div class="crm-tabs" style="display: none;">
                     <button class="tab-btn active" onclick="showCrmTab('leads')">📋 Leads</button>
                     <button class="tab-btn" onclick="showCrmTab('contacts')">📞 Contatos</button>
                     <button class="tab-btn" onclick="showCrmTab('pipeline')">📊 Pipeline</button>
                 </div>
 
-                <div id="crm-leads-tab" class="crm-tab active">
+                <div id="crm-leads-tab" class="crm-tab active" style="display: none;">
                     <div class="crm-actions">
                         <button class="btn-primary" onclick="loadCrmLeads()">🔄 Atualizar Leads</button>
                         <button class="btn-secondary" onclick="sendMarketingEmails()">📧 Enviar Emails</button>
@@ -1292,6 +1293,38 @@ Não há limites, escreva livremente..."></textarea>
     <script src="/js/ereader.js"></script>
     <script src="/js/dashboard.js"></script>
     <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('✅ Service Worker registrado!', reg.scope))
+                    .catch(err => console.log('❌ Erro ao registrar Service Worker:', err));
+            });
+        }
+        
+        // Dark Mode Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Atualizar ícone
+            const icon = document.getElementById('theme-toggle');
+            icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        // Carregar tema salvo
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        window.addEventListener('DOMContentLoaded', () => {
+            const icon = document.getElementById('theme-toggle');
+            if (icon) {
+                icon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+            }
+        });
+        
         // Inicializar E-Reader ao carregar a página
         document.addEventListener('DOMContentLoaded', function() {
             ereaderSystem = new EReaderSystem();

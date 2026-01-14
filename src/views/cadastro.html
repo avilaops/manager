@@ -207,6 +207,12 @@
             padding-right: 40px;
         }
         
+        .form-group select option {
+            background: #1e293b;
+            color: white;
+            padding: 10px;
+        }
+        
         .input-valid {
             border-color: #10b981 !important;
             background: rgba(16, 185, 129, 0.05) !important;
@@ -545,7 +551,41 @@
                     <label for="descricao">Tell us about your vision</label>
                     <div class="input-wrapper">
                         <i class="iconoir-edit-pencil input-icon" style="top: 20px;"></i>
-                        <textarea id="descricao" name="descricao" placeholder="Describe your project goals, challenges, and what success looks like..."></textarea>
+                        <textarea id="descricao" name="descricao" rows="4" placeholder="Describe your project goals, challenges, and what success looks like..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="indicacao">Como nos conheceu?</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-user-star input-icon"></i>
+                        <select id="indicacao" name="indicacao">
+                            <option value="">Selecione...</option>
+                            <option value="Google">Google / Busca Online</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Indicacao">Indicação de conhecido</option>
+                            <option value="Cliente">Cliente anterior</option>
+                            <option value="Evento">Evento / Networking</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomeIndicacao">Nome de quem indicou (se aplicável)</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-user input-icon"></i>
+                        <input type="text" id="nomeIndicacao" name="nomeIndicacao" placeholder="Ex: João Silva">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observacoes">Observações adicionais</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-notes input-icon" style="top: 20px;"></i>
+                        <textarea id="observacoes" name="observacoes" rows="3" placeholder="Informações extras, prazos especiais, requisitos específicos..."></textarea>
                     </div>
                 </div>
                 
