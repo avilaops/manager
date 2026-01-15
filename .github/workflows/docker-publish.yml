@@ -6,9 +6,11 @@ on:
       - main
     tags:
       - 'v*.*.*'
-  pull_request:
-    branches:
-      - main
+  # Desabilitado pull_request para evitar builds desnecessários
+  # pull_request:
+  #   branches:
+  #     - main
+  workflow_dispatch: # Permite execução manual
 
 env:
   REGISTRY: ghcr.io
@@ -16,10 +18,13 @@ env:
 
 jobs:
   build-and-push:
+    # Executar apenas em tags ou manualmente
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      id-token: write # Necessário para OIDC
 
     steps:
       - name: Checkout repository
