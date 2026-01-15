@@ -608,6 +608,7 @@ body {
     font-size: 3em;
 }
 
+.stat-content h2,
 .stat-content h3 {
     font-size: 0.9em;
     color: var(--text-secondary);
@@ -728,6 +729,8 @@ body {
 /* Buttons */
 .btn-primary {
     padding: 12px 24px;
+    min-height: 48px;
+    min-width: 48px;
     background: var(--primary-color);
     color: white;
     border: none;
@@ -735,6 +738,9 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-primary:hover {
@@ -1061,6 +1067,9 @@ body {
 }
 
 .btn-secondary {
+    padding: 12px 24px;
+    min-height: 48px;
+    min-width: 48px;
     background: #64748b;
     color: white;
     border: none;
@@ -1068,6 +1077,9 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-secondary:hover {

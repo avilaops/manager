@@ -1,5 +1,5 @@
 // Service Worker para PWA
-const CACHE_NAME = 'avila-dashboard-v2';
+const CACHE_NAME = 'avila-dashboard-v3';
 const urlsToCache = [
   '/',
   '/dashboard.html',
