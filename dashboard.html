@@ -39,7 +39,7 @@
                 <span>CRM</span>
                 <div class="dropdown-content">
                     <a href="#" onclick="event.preventDefault(); showSection('crm');">📊 Dashboard CRM</a>
-                    <a href="#" onclick="event.preventDefault(); openCadastroCompletoModal();">➕ Cadastro Completo</a>
+                    <a href="/cadastro.html">➕ Cadastro Completo</a>
                 </div>
             </div>
             
@@ -819,7 +819,7 @@ Use hashtags para maior alcance!
 
                 <div id="crm-leads-tab" class="crm-tab active">
                     <div class="crm-actions">
-                        <button class="btn-primary" onclick="openNovoClienteModal()" style="background: #10b981; font-weight: 600;">➕ Novo Cliente</button>
+                        <button class="btn-primary" onclick="window.location.href='/cadastro.html'" style="background: #10b981; font-weight: 600;">➕ Novo Cliente</button>
                         <button class="btn-primary" onclick="loadCrmLeads()">🔄 Atualizar Leads</button>
                         <button class="btn-secondary" onclick="sendMarketingEmails()">📧 Enviar Emails</button>
                         <button class="btn-success" onclick="fazerBackupCompleto()">💾 Backup Completo</button>
@@ -1007,7 +1007,7 @@ Use hashtags para maior alcance!
 
                 <div id="crm-contacts-tab" class="crm-tab">
                     <div class="crm-actions">
-                        <button class="btn-primary" onclick="openNovoClienteModal()" style="background: #10b981; font-weight: 600;">➕ Novo Cliente</button>
+                        <button class="btn-primary" onclick="window.location.href='/cadastro.html'" style="background: #10b981; font-weight: 600;">➕ Novo Cliente</button>
                         <button class="btn-primary" onclick="loadContacts()">🔄 Carregar Contatos</button>
                         <button class="btn-success" onclick="fazerBackupCompleto()">💾 Backup Completo</button>
                         <button class="btn-info" onclick="exportarContatosCSV()">📊 Exportar CSV</button>
@@ -1311,7 +1311,7 @@ Use hashtags para maior alcance!
         </div>
     </div>
 
-    <!-- Modal Cadastro Completo -->
+    <!-- MODAL DUPLICADO DESATIVADO - REMOVIDO
     <div id="cadastroCompletoModal" class="cadastro-modal-overlay" style="display: none;">
         <div class="cadastro-modal-container">
             <button class="cadastro-close-btn" onclick="closeCadastroCompleto()">✕</button>
@@ -2057,8 +2057,8 @@ Use hashtags para maior alcance!
         </div>
     </div>
 
-    <script src="dashboard.js"></script>
-    <script src="src/public/js/calendar.js"></script>
+    <script defer src="dashboard.js"></script>
+    <script defer src="src/public/js/calendar.js"></script>
     
     <!-- Tawk.to Chat Widget -->
     <script type="text/javascript">

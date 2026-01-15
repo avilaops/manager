@@ -2,12 +2,16 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 import { mongoDBService } from './services/mongodb.service.js';
 import { crmService } from './services/crm.service.js';
 import { calendarService } from './services/calendar.service.js';
 import { gmailService } from './services/gmail.service.js';
 import { ereaderService } from './services/ereader.service.js';
 import { universalService } from './services/universal.service.js';
+
+// Carregar variáveis de ambiente
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
