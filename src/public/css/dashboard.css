@@ -258,6 +258,8 @@ body {
 
 .user-icon {
     font-size: 1.3em;
+    color: inherit;
+    filter: none;
 }
 
 .user-name {
