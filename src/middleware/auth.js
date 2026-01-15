@@ -1,6 +1,7 @@
-const jwt = require('jsonwebtoken');
-const config = require('../config/config');
-const { AppError } = require('./errorHandler');
+import jwt from 'jsonwebtoken';
+import { AppError } from './errorHandler.js';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'seu_secret_aqui_muito_seguro_123';
 
 /**
  * Middleware de autenticação JWT
@@ -18,7 +19,7 @@ const authenticate = (req, res, next) => {
         const token = authHeader.split(' ')[1];
 
         // Verifica o token
-        const decoded = jwt.verify(token, config.security.jwtSecret);
+        const decoded = jwt.verify(token, JWT_SECRET);
         
         // Adiciona dados do usuário na requisição
         req.user = decoded;
@@ -39,10 +40,10 @@ const authenticate = (req, res, next) => {
  * Gera um token JWT
  */
 const generateToken = (payload, expiresIn = '24h') => {
-    return jwt.sign(payload, config.security.jwtSecret, { expiresIn });
+    return jwt.sign(payload, JWT_SECRET, { expiresIn });
 };
 
-module.exports = {
+export {
     authenticate,
     generateToken
 };

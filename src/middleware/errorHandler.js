@@ -53,7 +53,7 @@ const notFoundHandler = (req, res) => {
     });
 };
 
-module.exports = {
+export {
     AppError,
     errorHandler,
     asyncHandler,

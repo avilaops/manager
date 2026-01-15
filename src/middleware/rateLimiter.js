@@ -1,4 +1,4 @@
-const rateLimit = require('express-rate-limit');
+import rateLimit from 'express-rate-limit';
 
 /**
  * Rate limiter geral
@@ -42,7 +42,7 @@ const apiLimiter = rateLimit({
     }
 });
 
-module.exports = {
+export {
     generalLimiter,
     loginLimiter,
     apiLimiter

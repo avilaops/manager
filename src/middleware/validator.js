@@ -1,5 +1,5 @@
-const { body, param, query, validationResult } = require('express-validator');
-const { AppError } = require('../middleware/errorHandler');
+import { body, param, query, validationResult } from 'express-validator';
+import { AppError } from '../middleware/errorHandler.js';
 
 /**
  * Middleware para processar resultados de validação
@@ -67,7 +67,8 @@ const validators = {
     ]
 };
 
-module.exports = {
+export {
     validate,
     validators
 };
+

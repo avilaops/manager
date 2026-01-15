@@ -9,6 +9,8 @@ import { calendarService } from './services/calendar.service.js';
 import { gmailService } from './services/gmail.service.js';
 import { ereaderService } from './services/ereader.service.js';
 import { universalService } from './services/universal.service.js';
+// @ts-ignore
+import authRoutes from './routes/auth.routes.js';
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -25,6 +27,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/css', express.static(path.join(__dirname, '../src/public/css')));
 app.use('/js', express.static(path.join(__dirname, '../src/public/js')));
+
+// ===== Rotas de Autenticação =====
+app.use('/api/auth', authRoutes);
 
 // ===== Rotas para páginas HTML =====
 app.get('/cadastro.html', (_req: Request, res: Response) => {

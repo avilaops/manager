@@ -161,46 +161,85 @@
     </div>
     
     <script>
-        // Credenciais válidas
-        const validCredentials = [
-            { email: 'nicolas@avila.inc', password: '7Aciqgr7@', name: 'Nicolas Avila' },
-            { email: 'adm@grdcompany', password: 'Grd@123', name: 'Administrador GRD' }
-        ];
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : 'https://manager-api.onrender.com/api';
         
         // Verificar se já está logado
-        if (sessionStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = 'dashboard.html';
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // Validar token com o backend
+            fetch(`${API_URL}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    localStorage.removeItem('authToken');
+                }
+            })
+            .catch(() => {
+                localStorage.removeItem('authToken');
+            });
         }
         
-        function handleLogin(event) {
+        async function handleLogin(event) {
             event.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
+            const submitButton = event.target.querySelector('button[type="submit"]');
             
-            // Verificar credenciais
-            const user = validCredentials.find(
-                cred => cred.email === email && cred.password === password
-            );
+            // Desabilitar botão durante o login
+            submitButton.disabled = true;
+            submitButton.textContent = 'Entrando...';
             
-            if (user) {
-                // Login bem-sucedido
-                sessionStorage.setItem('isLoggedIn', 'true');
-                sessionStorage.setItem('userEmail', user.email);
-                sessionStorage.setItem('userName', user.name);
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
                 
-                // Redirecionar para o dashboard
-                window.location.href = 'dashboard.html';
-            } else {
-                // Mostrar erro
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Salvar token e informações do usuário
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userEmail', data.user.email);
+                    localStorage.setItem('userName', data.user.name);
+                    
+                    // Redirecionar para o dashboard
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // Mostrar erro
+                    errorMessage.textContent = data.error || 'Erro ao fazer login';
+                    errorMessage.classList.add('show');
+                    document.getElementById('password').value = '';
+                    
+                    // Remover mensagem de erro após 3 segundos
+                    setTimeout(() => {
+                        errorMessage.classList.remove('show');
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                errorMessage.textContent = 'Erro ao conectar com o servidor';
                 errorMessage.classList.add('show');
-                document.getElementById('password').value = '';
                 
-                // Remover mensagem de erro após 3 segundos
                 setTimeout(() => {
                     errorMessage.classList.remove('show');
                 }, 3000);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Entrar';
             }
         }
         
