@@ -1292,15 +1292,18 @@ Não há limites, escreva livremente..."></textarea>
 
     <link rel="stylesheet" href="/css/ereader.css" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="/css/ereader.css"></noscript>
-    <script defer src="/js/ereader.js?v=4"></script>
-    <script defer src="/js/dashboard.js?v=4"></script>
+    <script src="/js/env.config.js"></script>
+    <script src="/js/logger.js"></script>
+    <script src="/js/auth.js"></script>
+    <script defer src="/js/ereader.js?v=5"></script>
+    <script defer src="/js/dashboard.js?v=5"></script>
     <script>
-        // Registrar Service Worker
-        if ('serviceWorker' in navigator) {
+        // Registrar Service Worker (apenas em produção ou se habilitado)
+        if ('serviceWorker' in navigator && (ENV?.ENABLE_SERVICE_WORKER ?? true)) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(reg => console.log('✅ Service Worker registrado!', reg.scope))
-                    .catch(err => console.log('❌ Erro ao registrar Service Worker:', err));
+                navigator.serviceWorker.register('/service-worker.js?v=5')
+                    .then(reg => logger?.log('Service Worker registrado', reg.scope))
+                    .catch(err => logger?.error('Erro ao registrar Service Worker', err));
             });
         }
         
@@ -1332,30 +1335,35 @@ Não há limites, escreva livremente..."></textarea>
             ereaderSystem = new EReaderSystem();
         });
         
-        // Lazy load Google Analytics após interação do usuário
-        let gaLoaded = false;
-        function loadGoogleAnalytics() {
-            if (gaLoaded) return;
-            gaLoaded = true;
-            
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
-            document.head.appendChild(script);
-            
-            script.onload = function() {
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', 'G-XXXXXXXXXX');
-            };
-        }
+        // Google Analytics (configuração)
+        // Para ativar: defina GA_MEASUREMENT_ID e ENV.ENABLE_ANALYTICS = true
+        const GA_MEASUREMENT_ID = null; // Ex: 'G-ABC123XYZ'
         
-        // Carregar GA após 3s ou na primeira interação
-        setTimeout(loadGoogleAnalytics, 3000);
-        ['scroll', 'click', 'mousemove', 'keydown'].forEach(event => {
-            window.addEventListener(event, loadGoogleAnalytics, { once: true, passive: true });
-        });
+        if (GA_MEASUREMENT_ID && ENV?.ENABLE_ANALYTICS) {
+            let gaLoaded = false;
+            function loadGoogleAnalytics() {
+                if (gaLoaded) return;
+                gaLoaded = true;
+                
+                const script = document.createElement('script');
+                script.async = true;
+                script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+                document.head.appendChild(script);
+                
+                script.onload = function() {
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', GA_MEASUREMENT_ID);
+                };
+            }
+            
+            // Carregar GA após 3s ou na primeira interação
+            setTimeout(loadGoogleAnalytics, 3000);
+            ['scroll', 'click', 'mousemove', 'keydown'].forEach(event => {
+                window.addEventListener(event, loadGoogleAnalytics, { once: true, passive: true });
+            });
+        }
     </script>
 </body>
 </html>

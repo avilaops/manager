@@ -1,18 +1,10 @@
-// Configurações
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+// Configurações de Ambiente
+const API_BASE = window.ENV?.API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000/api'
-    : 'https://manager-api.onrender.com/api'; // ATENÇÃO: Altere 'manager-api' para o nome do seu app no Render
+    : 'https://manager-api.onrender.com/api');
 
-// Configuração mockada para frontend (quando backend não disponível)
-const CONFIG = {
-    cargo: {
-        token: 'Configure seu token no backend'
-    },
-    gmail: [],
-    gcloud: {
-        clientId: 'Configure no backend'
-    }
-};
+// Logger seguro
+const log = window.logger || console;
 
 // Toggle Sidebar (Desabilitado - Menu horizontal)
 function toggleSidebar() {
@@ -36,6 +28,38 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
+// Função para mostrar seções
+function showSection(sectionName) {
+    // Ocultar todas as seções
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Mostrar seção específica
+    const targetSection = document.getElementById(sectionName + '-section') || document.getElementById(sectionName);
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        
+        // Inicializar seção específica se necessário
+        if (sectionName === 'design-copy') {
+            initializeDesignCopySection();
+        }
+    }
+    
+    // Atualizar menu ativo
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Encontrar e ativar item do menu
+    const activeItem = document.querySelector(`[onclick*="showSection('${sectionName}')"]`);
+    if (activeItem) {
+        activeItem.classList.add('active');
+    }
+}
+
 // Check if backend is running
 async function checkBackend() {
     try {
@@ -51,17 +75,12 @@ async function loadDashboardData() {
     // Carregar contagem do GitHub
     try {
         const response = await fetch(`${API_BASE}/github/repos`);
-        
-        if (!response.ok) {
-            throw new Error('Backend não disponível');
-        }
-        
         const data = await response.json();
         if (data.success) {
             document.getElementById('github-count').textContent = data.repos.length;
         }
     } catch (error) {
-        console.log('⚠️ GitHub: Backend não disponível');
+        log.debug('GitHub não configurado');
     }
     
     // Carregar status de configuração
@@ -75,11 +94,6 @@ async function loadConfigurationStatus() {
     
     try {
         const response = await fetch(`${API_BASE}/config/status`);
-        
-        if (!response.ok) {
-            throw new Error(`Backend não disponível (${response.status})`);
-        }
-        
         const data = await response.json();
         
         if (!data.success) throw new Error('Erro ao carregar status');
@@ -232,23 +246,10 @@ async function loadConfigurationStatus() {
         container.innerHTML = html;
         
     } catch (error) {
-        console.log('⚠️ Backend não disponível:', error.message);
+        console.error('Erro ao carregar status:', error);
         container.innerHTML = `
-            <div class="service-card" style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px;">
-                <h3 style="margin: 0 0 10px 0; color: #92400e; display: flex; align-items: center; gap: 8px;">
-                    ⚙️ Backend não conectado
-                </h3>
-                <p style="color: #78350f; margin: 8px 0; line-height: 1.6;">
-                    O dashboard está funcionando em modo frontend apenas. Para verificar as configurações dos serviços:
-                </p>
-                <ul style="color: #78350f; margin: 10px 0 10px 20px; line-height: 1.8;">
-                    <li>Configure o backend em: <code style="background: #fde68a; padding: 2px 6px; border-radius: 3px;">server.js</code></li>
-                    <li>Inicie o servidor: <code style="background: #fde68a; padding: 2px 6px; border-radius: 3px;">npm start</code></li>
-                    <li>Ou faça deploy do backend no Railway/Heroku</li>
-                </ul>
-                <p style="color: #92400e; margin-top: 12px; font-size: 0.9em;">
-                    💡 Dica: O dashboard funciona offline, mas recursos avançados requerem o backend.
-                </p>
+            <div class="service-card" style="background: #fee2e2; border-left: 4px solid #ef4444;">
+                <p style="color: #991b1b;">❌ Erro ao verificar configurações: ${error.message}</p>
             </div>
         `;
     }
@@ -296,7 +297,11 @@ function showSection(sectionName) {
         ai: { title: 'AI & ML Services', subtitle: 'OpenAI, HuggingFace e mais' },
         gravatar: { title: 'Gravatar', subtitle: 'Gerenciar avatar' },
         sentry: { title: 'Sentry', subtitle: 'Error tracking' },
-        crm: { title: 'CRM & Leads', subtitle: 'Gestão de clientes e email marketing' }
+        crm: { title: 'CRM & Leads', subtitle: 'Gestão de clientes e email marketing' },
+        contacts: { title: 'Contatos Unificados', subtitle: 'Gerenciamento centralizado de todos os contatos' },
+        campanhas: { title: 'Campanhas de Marketing', subtitle: 'Monitoramento e otimização automática de campanhas' },
+        'alertas-campanhas': { title: 'Alertas de Campanhas', subtitle: 'Campanhas que precisam de atenção imediata' },
+        'linkedin-automation': { title: 'LinkedIn Automation', subtitle: 'Sistema de Automação e Targeting Inteligente' }
     };
     
     if (titles[sectionName]) {
@@ -361,6 +366,15 @@ function loadSectionData(sectionName) {
             break;
         case 'crm':
             loadCRMData();
+            break;
+        case 'contacts':
+            loadContactsUnified();
+            break;
+        case 'campanhas':
+            loadCampanhasData();
+            break;
+        case 'alertas-campanhas':
+            loadAlertasCampanhasData();
             break;
     }
 }
@@ -919,28 +933,38 @@ function showLinkedInTab(tabName) {
 
 // Growth Tools Functions
 function runDailyRoutine() {
-    // Funcionalidade desabilitada por enquanto
-    console.log('Rotina diária do LinkedIn - em desenvolvimento');
+    if (confirm('Isso vai executar a rotina diária do LinkedIn. Continuar?')) {
+        // Run the batch file
+        alert('Execute o arquivo LinkedIn_Daily_Routine.bat no diretório do projeto para iniciar a rotina automatizada.');
+    }
 }
 
 function showEngagementTemplates() {
-    // Funcionalidade desabilitada por enquanto
-    console.log('Templates de engagement - em desenvolvimento');
+    if (confirm('Isso vai mostrar os templates de comentários. Continuar?')) {
+        // Run the node script
+        alert('Execute: node linkedin-engagement.js templates');
+    }
 }
 
 function showTodayTasks() {
-    // Funcionalidade desabilitada por enquanto
-    console.log('Tarefas do dia - em desenvolvimento');
+    if (confirm('Isso vai mostrar as tarefas de hoje. Continuar?')) {
+        // Run the node script
+        alert('Execute: node linkedin-engagement.js today');
+    }
 }
 
 function openGrowthMenu() {
-    // Funcionalidade desabilitada por enquanto
-    console.log('Menu de crescimento - em desenvolvimento');
+    if (confirm('Isso vai abrir o menu de crescimento. Continuar?')) {
+        // Run the batch file
+        alert('Execute o arquivo LinkedIn_Growth_Menu.bat no diretório do projeto.');
+    }
 }
 
 function openDailyChecklist() {
-    // Funcionalidade desabilitada por enquanto
-    console.log('Checklist diário - em desenvolvimento');
+    if (confirm('Isso vai abrir o checklist diário. Continuar?')) {
+        // Open the markdown file
+        alert('Abra o arquivo DAILY_CHECKLIST.md no diretório do projeto para ver o checklist.');
+    }
 }
 
 // ============================================
@@ -1351,7 +1375,6 @@ function carregarCompromissos() {
     let html = '';
     compromissos.forEach((comp, index) => {
         const dataFormatada = new Date(comp.data + 'T' + comp.hora).toLocaleString('pt-BR');
-        const linkIcon = comp.linkReuniao ? `<a href="${comp.linkReuniao}" target="_blank" style="margin-left: 10px; color: #3b82f6; text-decoration: none;">🔗 Link</a>` : '';
         html += `
             <div class="service-card">
                 <div class="service-header">
@@ -1359,10 +1382,10 @@ function carregarCompromissos() {
                         <div class="service-title">${comp.titulo}</div>
                         <p style="color: #64748b; margin-top: 5px;">${comp.descricao || 'Sem descrição'}</p>
                     </div>
-                    <span class="service-status status-active">⏰ ${dataFormatada} ${linkIcon}</span>
+                    <span class="service-status status-active">⏰ ${dataFormatada}</span>
                 </div>
-                <button onclick="removerCompromisso(${index})" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 1.2em;" title="Remover">
-                    🗑️
+                <button onclick="removerCompromisso(${index})" style="margin-top: 10px; background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                    🗑️ Remover
                 </button>
             </div>
         `;
@@ -1371,49 +1394,50 @@ function carregarCompromissos() {
     container.innerHTML = html;
 }
 
-async function agendarCompromisso() {
+function agendarCompromisso() {
     const titulo = document.getElementById('titulo').value;
     const descricao = document.getElementById('descricao').value;
     const data = document.getElementById('data').value;
     const hora = document.getElementById('hora').value;
     const lembrete = document.getElementById('lembrete').value;
-    const linkReuniao = document.getElementById('linkReuniao').value;
     
-    if (!titulo || !data || !hora) {
-        alert('❌ Preencha título, data e hora!');
-        return;
-    }
+    // Salvar no localStorage
+    const compromissos = JSON.parse(localStorage.getItem('compromissos') || '[]');
+    compromissos.push({ titulo, descricao, data, hora, lembrete });
+    localStorage.setItem('compromissos', JSON.stringify(compromissos));
     
-    try {
-        // Enviar para o backend agendar automaticamente
-        const response = await fetch('http://localhost:3000/api/calendar/schedule', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ titulo, descricao, data, hora, lembrete, linkReuniao })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            alert(result.message);
-            
-            // Salvar também no localStorage
-            const compromissos = JSON.parse(localStorage.getItem('compromissos') || '[]');
-            compromissos.push({ titulo, descricao, data, hora, lembrete, linkReuniao });
-            localStorage.setItem('compromissos', JSON.stringify(compromissos));
-            
-            // Limpar formulário
-            document.getElementById('calendar-form').reset();
-            
-            // Recarregar lista
-            carregarCompromissos();
-        } else {
-            alert('❌ Erro ao agendar: ' + result.error);
-        }
-    } catch (error) {
-        console.error('Erro ao agendar:', error);
-        alert('❌ Erro ao conectar com o servidor!');
-    }
+    // Criar script PowerShell para Windows Task Scheduler
+    const dataHora = new Date(data + 'T' + hora);
+    const dataNotificacao = new Date(dataHora.getTime() - lembrete * 60000);
+    
+    const script = `
+# Script de agendamento de compromisso
+$taskName = "Compromisso_${titulo.replace(/[^a-zA-Z0-9]/g, '_')}"
+$action = New-ScheduledTaskAction -Execute "msg" -Argument "* /TIME:0 'COMPROMISSO: ${titulo} - ${descricao}'"
+$trigger = New-ScheduledTaskTrigger -Once -At "${dataNotificacao.toISOString()}"
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Force
+Write-Host "Compromisso agendado com sucesso no Windows Task Scheduler!"
+Write-Host "Nome da tarefa: $taskName"
+Write-Host "Data/Hora: ${dataHora.toLocaleString('pt-BR')}"
+`;
+    
+    // Download do script
+    const blob = new Blob([script], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `agendar_${titulo.replace(/[^a-zA-Z0-9]/g, '_')}.ps1`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    // Limpar formulário
+    document.getElementById('calendar-form').reset();
+    
+    // Recarregar lista
+    carregarCompromissos();
+    
+    alert('✅ Compromisso salvo! Execute o arquivo .ps1 baixado para agendar no Windows Task Scheduler.');
 }
 
 function removerCompromisso(index) {
@@ -2558,11 +2582,6 @@ async function loadCRMData() {
     
     try {
         const response = await fetch(`${API_BASE}/crm/leads`);
-        
-        if (!response.ok) {
-            throw new Error(`Backend não disponível (${response.status})`);
-        }
-        
         const data = await response.json();
         
         if (!data.success) throw new Error(data.error);
@@ -2746,19 +2765,8 @@ async function loadCRMData() {
     } catch (error) {
         console.error('CRM error:', error);
         container.innerHTML = `
-            <div class="service-card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
-                <h3 style="color: #92400e; margin-bottom: 15px;">⚠️ Backend Não Disponível</h3>
-                <p style="color: #78350f; margin-bottom: 10px;">
-                    O CRM requer conexão com o backend. Configure o backend no Railway ou servidor de sua escolha.
-                </p>
-                <p style="color: #78350f; font-size: 0.9em;">
-                    <strong>Erro:</strong> ${error.message}
-                </p>
-                <div style="margin-top: 15px; padding: 10px; background: white; border-radius: 6px;">
-                    <p style="color: #64748b; font-size: 0.85em;">
-                        💡 <strong>Dica:</strong> Altere <code>API_BASE</code> em dashboard.js para apontar para seu backend em produção.
-                    </p>
-                </div>
+            <div class="service-card" style="background: #fee2e2; border-left: 4px solid #ef4444;">
+                <p style="color: #991b1b;">❌ Erro ao carregar CRM: ${error.message}</p>
             </div>
         `;
     }
@@ -2824,495 +2832,6 @@ async function deleteLead(leadId) {
     }
 }
 
-// Visualizar provisionamento do cliente
-async function viewClientProvision(leadId) {
-    try {
-        const response = await fetch(`${API_BASE}/crm/leads/${leadId}`);
-        const data = await response.json();
-        
-        if (!data.success) throw new Error(data.error);
-        
-        const lead = data.lead;
-        const provision = lead.provisionamento || {};
-        
-        let html = `
-            <div style="background: white; padding: 30px; border-radius: 12px; max-width: 700px; margin: 20px auto;">
-                <h2 style="margin-bottom: 25px; color: #1e293b;">🔍 Provisionamento do Cliente</h2>
-                
-                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                    <h3 style="color: #475569; margin-bottom: 15px;">📋 Informações do Cliente</h3>
-                    <p><strong>Nome:</strong> ${lead.nome}</p>
-                    <p><strong>Email:</strong> ${lead.email}</p>
-                    <p><strong>Empresa:</strong> ${lead.empresa || 'Não informado'}</p>
-                    <p><strong>Status:</strong> ${lead.status}</p>
-                </div>
-                
-                ${provision.github ? `
-                    <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
-                        <h3 style="color: #166534; margin-bottom: 15px;">✅ GitHub Repository</h3>
-                        <p><strong>Repositório:</strong> <a href="${provision.github.url}" target="_blank" style="color: #3b82f6;">${provision.github.name}</a></p>
-                        <p><strong>GitHub Pages:</strong> <a href="${provision.github.pagesUrl}" target="_blank" style="color: #3b82f6;">${provision.github.pagesUrl}</a></p>
-                        <p><strong>Criado em:</strong> ${new Date(provision.github.criadoEm).toLocaleString('pt-BR')}</p>
-                    </div>
-                ` : ''}
-                
-                ${provision.mongodb ? `
-                    <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #059669;">
-                        <h3 style="color: #166534; margin-bottom: 15px;">✅ MongoDB Database</h3>
-                        <p><strong>Database:</strong> ${provision.mongodb.database}</p>
-                        <p><strong>Collection:</strong> ${provision.mongodb.collection}</p>
-                        <p><strong>Connection String:</strong> <code style="background: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">${provision.mongodb.uri ? '***hidden***' : 'Não configurado'}</code></p>
-                    </div>
-                ` : ''}
-                
-                ${provision.railway ? `
-                    <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0ea5e9;">
-                        <h3 style="color: #075985; margin-bottom: 15px;">✅ Railway Deployment</h3>
-                        <p><strong>Projeto:</strong> ${provision.railway.projectName}</p>
-                        <p><strong>URL:</strong> <a href="${provision.railway.url}" target="_blank" style="color: #3b82f6;">${provision.railway.url}</a></p>
-                        <p><strong>Status:</strong> ${provision.railway.status}</p>
-                    </div>
-                ` : ''}
-                
-                ${!provision.github && !provision.mongodb && !provision.railway ? `
-                    <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                        <h3 style="color: #92400e; margin-bottom: 10px;">⚠️ Provisionamento Pendente</h3>
-                        <p style="color: #78350f;">Este cliente ainda não foi provisionado. Clique em "Fechar Venda & Provisionar" para iniciar o processo automático.</p>
-                    </div>
-                ` : ''}
-                
-                <button onclick="this.parentElement.remove()" class="btn-primary" style="width: 100%; margin-top: 20px; padding: 12px;">
-                    Fechar
-                </button>
-            </div>
-        `;
-        
-        // Criar modal
-        const modal = document.createElement('div');
-        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; overflow-y: auto; padding: 20px;';
-        modal.innerHTML = html;
-        modal.onclick = (e) => {
-            if (e.target === modal) modal.remove();
-        };
-        document.body.appendChild(modal);
-        
-    } catch (error) {
-        alert('❌ Erro ao carregar provisionamento: ' + error.message);
-    }
-}
-
-// ============================================
-// LIGHTROOM INSPECTOR - Sistema de Inspeção
-// ============================================
-
-async function runSystemInspection() {
-    const resultsDiv = document.getElementById('inspection-results');
-    const placeholderDiv = document.getElementById('inspection-placeholder');
-    
-    // Esconder placeholder e mostrar loading
-    placeholderDiv.style.display = 'none';
-    resultsDiv.style.display = 'block';
-    resultsDiv.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-            <div class="loading"></div>
-            <p style="color: #64748b; margin-top: 20px;">Escaneando sistema... Isso pode levar alguns segundos.</p>
-        </div>
-    `;
-    
-    // Simular delay para análise
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Executar todas as verificações
-    const results = {
-        errors: await checkJavaScriptErrors(),
-        endpoints: await checkEndpoints(),
-        performance: await checkPerformance(),
-        ui: await checkUIIssues(),
-        security: await checkSecurity(),
-        improvements: await suggestImprovements()
-    };
-    
-    // Renderizar resultados
-    renderInspectionResults(results);
-}
-
-async function checkJavaScriptErrors() {
-    const errors = [];
-    
-    // Verificar funções não definidas
-    const undefinedFunctions = [];
-    const allScripts = Array.from(document.querySelectorAll('script')).map(s => s.innerHTML);
-    
-    // Capturar erros do console
-    const originalError = console.error;
-    const capturedErrors = [];
-    console.error = (...args) => {
-        capturedErrors.push(args.join(' '));
-        originalError.apply(console, args);
-    };
-    
-    return {
-        count: capturedErrors.length,
-        items: capturedErrors.slice(0, 5),
-        severity: capturedErrors.length > 0 ? 'error' : 'success'
-    };
-}
-
-async function checkEndpoints() {
-    const endpoints = [
-        { name: 'CRM Leads', url: '/api/crm/leads' },
-        { name: 'CRM Contacts', url: '/api/crm/contacts' },
-        { name: 'Calendar Schedule', url: '/api/calendar/schedule' },
-        { name: 'GitHub Repos', url: '/api/github/repos' },
-        { name: 'MongoDB Databases', url: '/api/mongodb/databases' }
-    ];
-    
-    const results = [];
-    
-    for (const endpoint of endpoints) {
-        try {
-            const response = await fetch(`${API_BASE}${endpoint.url}`);
-            results.push({
-                name: endpoint.name,
-                url: endpoint.url,
-                status: response.ok ? 'online' : 'offline',
-                statusCode: response.status
-            });
-        } catch (error) {
-            results.push({
-                name: endpoint.name,
-                url: endpoint.url,
-                status: 'error',
-                error: error.message
-            });
-        }
-    }
-    
-    const online = results.filter(r => r.status === 'online').length;
-    const total = results.length;
-    
-    return {
-        count: online,
-        total: total,
-        items: results,
-        severity: online === total ? 'success' : (online > total / 2 ? 'warning' : 'error')
-    };
-}
-
-async function checkPerformance() {
-    const issues = [];
-    
-    // Verificar tamanho do DOM
-    const domSize = document.querySelectorAll('*').length;
-    if (domSize > 1500) {
-        issues.push({ type: 'DOM grande', value: `${domSize} elementos`, recommendation: 'Considere lazy loading ou virtualização' });
-    }
-    
-    // Verificar imagens sem lazy loading
-    const images = document.querySelectorAll('img:not([loading="lazy"])');
-    if (images.length > 10) {
-        issues.push({ type: 'Imagens sem lazy loading', value: `${images.length} imagens`, recommendation: 'Adicione loading="lazy" nas imagens' });
-    }
-    
-    // Verificar scripts inline
-    const inlineScripts = document.querySelectorAll('script:not([src])');
-    if (inlineScripts.length > 5) {
-        issues.push({ type: 'Muitos scripts inline', value: `${inlineScripts.length} scripts`, recommendation: 'Consolide scripts em arquivos externos' });
-    }
-    
-    // Verificar localStorage
-    const localStorageSize = JSON.stringify(localStorage).length;
-    if (localStorageSize > 5 * 1024 * 1024) {
-        issues.push({ type: 'localStorage grande', value: `${(localStorageSize / 1024 / 1024).toFixed(2)} MB`, recommendation: 'Limpe dados antigos do localStorage' });
-    }
-    
-    return {
-        count: issues.length,
-        items: issues,
-        severity: issues.length === 0 ? 'success' : (issues.length < 3 ? 'warning' : 'error')
-    };
-}
-
-async function checkUIIssues() {
-    const issues = [];
-    
-    // Verificar contraste de cores
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach((btn, idx) => {
-        if (idx < 3) { // Apenas primeiros 3 para exemplo
-            const bgColor = window.getComputedStyle(btn).backgroundColor;
-            const color = window.getComputedStyle(btn).color;
-            // Simplificado - em produção usaria algoritmo WCAG
-            if (bgColor === color) {
-                issues.push({ type: 'Contraste baixo', element: btn.textContent?.slice(0, 30), recommendation: 'Ajuste cores para melhor legibilidade' });
-            }
-        }
-    });
-    
-    // Verificar botões sem title/aria-label
-    const buttonsWithoutLabel = document.querySelectorAll('button:not([title]):not([aria-label])');
-    if (buttonsWithoutLabel.length > 5) {
-        issues.push({ type: 'Acessibilidade', value: `${buttonsWithoutLabel.length} botões sem labels`, recommendation: 'Adicione title ou aria-label para leitores de tela' });
-    }
-    
-    // Verificar inputs sem labels
-    const inputsWithoutLabel = document.querySelectorAll('input:not([aria-label]):not([id])');
-    if (inputsWithoutLabel.length > 0) {
-        issues.push({ type: 'Formulários', value: `${inputsWithoutLabel.length} inputs sem label`, recommendation: 'Associe labels aos inputs para acessibilidade' });
-    }
-    
-    return {
-        count: issues.length,
-        items: issues,
-        severity: issues.length === 0 ? 'success' : (issues.length < 3 ? 'warning' : 'error')
-    };
-}
-
-async function checkSecurity() {
-    const issues = [];
-    
-    // Verificar links externos sem rel="noopener"
-    const externalLinks = document.querySelectorAll('a[target="_blank"]:not([rel*="noopener"])');
-    if (externalLinks.length > 0) {
-        issues.push({ type: 'Links externos', value: `${externalLinks.length} links`, recommendation: 'Adicione rel="noopener noreferrer" para segurança' });
-    }
-    
-    // Verificar se tem HTTPS
-    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-        issues.push({ type: 'Protocolo HTTP', value: 'Sem HTTPS', recommendation: 'Configure SSL/TLS para conexões seguras' });
-    }
-    
-    // Verificar tokens expostos no código
-    const scripts = Array.from(document.querySelectorAll('script')).map(s => s.innerHTML).join('');
-    if (scripts.includes('sk_') || scripts.includes('pk_test') || scripts.includes('ghp_')) {
-        issues.push({ type: 'Token exposto', value: 'Possível token no código', recommendation: 'Use variáveis de ambiente para tokens sensíveis' });
-    }
-    
-    return {
-        count: issues.length,
-        items: issues,
-        severity: issues.length === 0 ? 'success' : (issues.length < 2 ? 'warning' : 'error')
-    };
-}
-
-async function suggestImprovements() {
-    const suggestions = [];
-    
-    // Verificar se tem Service Worker
-    if (!('serviceWorker' in navigator)) {
-        suggestions.push({ 
-            type: 'PWA', 
-            title: 'Progressive Web App', 
-            description: 'Adicione Service Worker para funcionalidade offline e melhor performance',
-            priority: 'medium'
-        });
-    }
-    
-    // Verificar cache do navegador
-    if (!document.querySelector('meta[http-equiv="cache-control"]')) {
-        suggestions.push({ 
-            type: 'Cache', 
-            title: 'Otimização de Cache', 
-            description: 'Configure cache headers para melhorar velocidade de carregamento',
-            priority: 'low'
-        });
-    }
-    
-    // Sugerir dark mode
-    if (!document.querySelector('[data-theme]') && !localStorage.getItem('theme')) {
-        suggestions.push({ 
-            type: 'UI/UX', 
-            title: 'Modo Escuro', 
-            description: 'Implemente theme switcher para dark mode',
-            priority: 'medium'
-        });
-    }
-    
-    // Sugerir lazy loading para imagens
-    const imagesCount = document.querySelectorAll('img').length;
-    const lazyImages = document.querySelectorAll('img[loading="lazy"]').length;
-    if (imagesCount > 10 && lazyImages < imagesCount * 0.5) {
-        suggestions.push({ 
-            type: 'Performance', 
-            title: 'Lazy Loading de Imagens', 
-            description: `${imagesCount - lazyImages} imagens poderiam usar lazy loading`,
-            priority: 'high'
-        });
-    }
-    
-    // Sugerir minificação
-    suggestions.push({ 
-        type: 'Build', 
-        title: 'Minificação de Assets', 
-        description: 'Configure build pipeline para minificar JS/CSS em produção',
-        priority: 'medium'
-    });
-    
-    // Sugerir analytics
-    if (!window.gtag && !window._paq) {
-        suggestions.push({ 
-            type: 'Analytics', 
-            title: 'Monitoramento de Usuários', 
-            description: 'Adicione Google Analytics ou alternativa para insights de uso',
-            priority: 'low'
-        });
-    }
-    
-    return {
-        count: suggestions.length,
-        items: suggestions
-    };
-}
-
-function renderInspectionResults(results) {
-    const resultsDiv = document.getElementById('inspection-results');
-    
-    const severityColors = {
-        success: '#10b981',
-        warning: '#f59e0b',
-        error: '#ef4444'
-    };
-    
-    const severityIcons = {
-        success: '✅',
-        warning: '⚠️',
-        error: '❌'
-    };
-    
-    let html = `
-        <div style="margin-bottom: 30px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
-                <div class="service-card" style="border-left: 4px solid ${severityColors[results.errors.severity]};">
-                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">ERROS JS</h4>
-                    <div style="font-size: 2em;">${severityIcons[results.errors.severity]}</div>
-                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.errors.count}</p>
-                </div>
-                
-                <div class="service-card" style="border-left: 4px solid ${severityColors[results.endpoints.severity]};">
-                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">ENDPOINTS</h4>
-                    <div style="font-size: 2em;">${severityIcons[results.endpoints.severity]}</div>
-                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.endpoints.count}/${results.endpoints.total}</p>
-                </div>
-                
-                <div class="service-card" style="border-left: 4px solid ${severityColors[results.performance.severity]};">
-                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">PERFORMANCE</h4>
-                    <div style="font-size: 2em;">${severityIcons[results.performance.severity]}</div>
-                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.performance.count} problemas</p>
-                </div>
-                
-                <div class="service-card" style="border-left: 4px solid ${severityColors[results.ui.severity]};">
-                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">UI/UX</h4>
-                    <div style="font-size: 2em;">${severityIcons[results.ui.severity]}</div>
-                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.ui.count} problemas</p>
-                </div>
-                
-                <div class="service-card" style="border-left: 4px solid ${severityColors[results.security.severity]};">
-                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">SEGURANÇA</h4>
-                    <div style="font-size: 2em;">${severityIcons[results.security.severity]}</div>
-                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.security.count} problemas</p>
-                </div>
-                
-                <div class="service-card" style="border-left: 4px solid #3b82f6;">
-                    <h4 style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;">MELHORIAS</h4>
-                    <div style="font-size: 2em;">💡</div>
-                    <p style="font-size: 1.5em; font-weight: bold; margin: 10px 0;">${results.improvements.count} sugestões</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Detalhes dos Endpoints -->
-        <div class="service-card" style="margin-bottom: 20px;">
-            <h3 style="margin-bottom: 15px;">🔌 Status dos Endpoints</h3>
-            <div style="display: grid; gap: 10px;">
-                ${results.endpoints.items.map(endpoint => `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: ${endpoint.status === 'online' ? '#f0fdf4' : '#fef2f2'}; border-radius: 6px;">
-                        <div>
-                            <strong>${endpoint.name}</strong>
-                            <p style="color: #64748b; font-size: 0.85em; margin-top: 4px;">${endpoint.url}</p>
-                        </div>
-                        <span style="background: ${endpoint.status === 'online' ? '#10b981' : '#ef4444'}; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.85em;">
-                            ${endpoint.status === 'online' ? '✅ Online' : '❌ Offline'}
-                        </span>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-        
-        <!-- Problemas de Performance -->
-        ${results.performance.count > 0 ? `
-            <div class="service-card" style="margin-bottom: 20px; border-left: 4px solid ${severityColors[results.performance.severity]};">
-                <h3 style="margin-bottom: 15px;">⚡ Problemas de Performance</h3>
-                ${results.performance.items.map(issue => `
-                    <div style="padding: 12px; background: #fef3c7; border-radius: 6px; margin-bottom: 10px;">
-                        <strong style="color: #92400e;">${issue.type}</strong>
-                        <p style="color: #78350f; margin: 5px 0;">${issue.value}</p>
-                        <p style="color: #64748b; font-size: 0.85em;">💡 ${issue.recommendation}</p>
-                    </div>
-                `).join('')}
-            </div>
-        ` : ''}
-        
-        <!-- Problemas de UI/UX -->
-        ${results.ui.count > 0 ? `
-            <div class="service-card" style="margin-bottom: 20px; border-left: 4px solid ${severityColors[results.ui.severity]};">
-                <h3 style="margin-bottom: 15px;">🎨 Problemas de UI/UX</h3>
-                ${results.ui.items.map(issue => `
-                    <div style="padding: 12px; background: #fef3c7; border-radius: 6px; margin-bottom: 10px;">
-                        <strong style="color: #92400e;">${issue.type}</strong>
-                        <p style="color: #78350f; margin: 5px 0;">${issue.value || issue.element || ''}</p>
-                        <p style="color: #64748b; font-size: 0.85em;">💡 ${issue.recommendation}</p>
-                    </div>
-                `).join('')}
-            </div>
-        ` : ''}
-        
-        <!-- Problemas de Segurança -->
-        ${results.security.count > 0 ? `
-            <div class="service-card" style="margin-bottom: 20px; border-left: 4px solid ${severityColors[results.security.severity]};">
-                <h3 style="margin-bottom: 15px;">🔒 Problemas de Segurança</h3>
-                ${results.security.items.map(issue => `
-                    <div style="padding: 12px; background: #fee2e2; border-radius: 6px; margin-bottom: 10px;">
-                        <strong style="color: #991b1b;">${issue.type}</strong>
-                        <p style="color: #7f1d1d; margin: 5px 0;">${issue.value}</p>
-                        <p style="color: #64748b; font-size: 0.85em;">💡 ${issue.recommendation}</p>
-                    </div>
-                `).join('')}
-            </div>
-        ` : ''}
-        
-        <!-- Sugestões de Melhorias -->
-        <div class="service-card" style="border-left: 4px solid #3b82f6;">
-            <h3 style="margin-bottom: 15px;">💡 Sugestões de Melhorias</h3>
-            <div style="display: grid; gap: 10px;">
-                ${results.improvements.items.map(suggestion => {
-                    const priorityColors = { high: '#ef4444', medium: '#f59e0b', low: '#10b981' };
-                    const priorityLabels = { high: 'Alta', medium: 'Média', low: 'Baixa' };
-                    return `
-                        <div style="padding: 15px; background: #f8fafc; border-radius: 6px; border-left: 3px solid ${priorityColors[suggestion.priority]};">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                                <strong style="color: #1e293b;">${suggestion.title}</strong>
-                                <span style="background: ${priorityColors[suggestion.priority]}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75em;">
-                                    ${priorityLabels[suggestion.priority]}
-                                </span>
-                            </div>
-                            <p style="color: #475569; font-size: 0.9em;">${suggestion.description}</p>
-                            <p style="color: #94a3b8; font-size: 0.8em; margin-top: 5px;">Categoria: ${suggestion.type}</p>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        </div>
-        
-        <div style="margin-top: 30px; text-align: center;">
-            <button onclick="runSystemInspection()" class="btn-primary" style="padding: 14px 32px;">
-                🔄 Escanear Novamente
-            </button>
-        </div>
-    `;
-    
-    resultsDiv.innerHTML = html;
-}
-
 // ============================================
 // SOCIAL MEDIA POST - Postar simultaneamente
 // ============================================
@@ -3365,10 +2884,10 @@ function previewPost() {
     }
     
     const platforms = [];
-    if (document.getElementById('platform-modal-linkedin').checked) platforms.push('LinkedIn');
-    if (document.getElementById('platform-modal-facebook').checked) platforms.push('Facebook');
-    if (document.getElementById('platform-modal-instagram').checked) platforms.push('Instagram');
-    if (document.getElementById('platform-modal-whatsapp').checked) platforms.push('WhatsApp');
+    if (document.getElementById('platform-linkedin').checked) platforms.push('LinkedIn');
+    if (document.getElementById('platform-facebook').checked) platforms.push('Facebook');
+    if (document.getElementById('platform-instagram').checked) platforms.push('Instagram');
+    if (document.getElementById('platform-whatsapp').checked) platforms.push('WhatsApp');
     
     const hasImage = document.getElementById('post-image').files.length > 0;
     
@@ -3387,10 +2906,10 @@ document.getElementById('social-post-form')?.addEventListener('submit', async fu
     const imageFile = document.getElementById('post-image').files[0];
     
     const platforms = {
-        linkedin: document.getElementById('platform-modal-linkedin').checked,
-        facebook: document.getElementById('platform-modal-facebook').checked,
-        instagram: document.getElementById('platform-modal-instagram').checked,
-        whatsapp: document.getElementById('platform-modal-whatsapp').checked
+        linkedin: document.getElementById('platform-linkedin').checked,
+        facebook: document.getElementById('platform-facebook').checked,
+        instagram: document.getElementById('platform-instagram').checked,
+        whatsapp: document.getElementById('platform-whatsapp').checked
     };
     
     if (!Object.values(platforms).some(v => v)) {
@@ -3584,6 +3103,17 @@ async function loadContacts() {
     
     try {
         const response = await fetch(`${API_BASE}/crm/contacts`);
+        
+        // Verificar se a resposta é JSON válida
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Servidor retornou resposta inválida. Verifique se a API está configurada corretamente.');
+        }
+        
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.contacts && data.contacts.length > 0) {
@@ -4254,474 +3784,1896 @@ async function syncEverything() {
 document.addEventListener('DOMContentLoaded', () => {
     // Load GitHub data for dashboard
     loadGitHubData();
+});
+// ============================================
+// NOVO CLIENTE MODAL
+// ============================================
+
+function openNovoClienteModal() {
+    document.getElementById('novoClienteModal').style.display = 'flex';
+    document.getElementById('novoClienteForm').reset();
+}
+
+function closeNovoClienteModal() {
+    document.getElementById('novoClienteModal').style.display = 'none';
+}
+
+document.getElementById('novoClienteForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-    // Initialize notifications system
-    initNotificationsSystem();
+    const novoCliente = {
+        name: document.getElementById('clienteNome').value,
+        email: document.getElementById('clienteEmail').value,
+        phone: document.getElementById('clienteTelefone').value,
+        company: document.getElementById('clienteEmpresa').value || '',
+        source: document.getElementById('clienteFonte').value,
+        status: document.getElementById('clienteStatus').value,
+        notes: document.getElementById('clienteObs').value || '',
+        createdAt: new Date().toISOString()
+    };
     
-    // Load user settings
-    loadUserSettings();
+    try {
+        const response = await fetch(`${API_BASE}/crm/cliente`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(novoCliente)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Mostrar notificação de sucesso
+            if (window.addNotification) {
+                window.addNotification('success', 'Cliente cadastrado!', novoCliente.name);
+            }
+            
+            // Fechar modal
+            closeNovoClienteModal();
+            
+            // Recarregar listas
+            loadCrmLeads();
+            loadContacts();
+            
+            // Mostrar mensagem de sucesso
+            alert(`✅ Cliente "${novoCliente.name}" cadastrado com sucesso!\n\n📧 Email: ${novoCliente.email}\n📞 Tel: ${novoCliente.phone}`);
+        } else {
+            throw new Error(result.error || 'Erro ao cadastrar cliente');
+        }
+    } catch (error) {
+        console.error('Erro ao cadastrar cliente:', error);
+        alert(`❌ Erro ao cadastrar cliente: ${error.message}`);
+    }
 });
 
-// ============================================
-// NOTIFICATIONS SYSTEM
-// ============================================
-
-let notificationsData = [];
-
-function initNotificationsSystem() {
-    // Load notifications from localStorage
-    const saved = localStorage.getItem('notifications');
-    if (saved) {
-        notificationsData = JSON.parse(saved);
-        updateNotificationBadge();
-        renderNotifications();
+// Close modal on overlay click
+document.getElementById('novoClienteModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'novoClienteModal') {
+        closeNovoClienteModal();
     }
-    
-    // Add sample notification
-    if (notificationsData.length === 0) {
-        addNotification('info', 'Bem-vindo ao Gerenciador Pessoal!', 'Sistema carregado com sucesso', true);
+});
+
+// ===== CADASTRO COMPLETO MODAL =====
+function openCadastroCompletoModal() {
+    const modal = document.getElementById('cadastroCompletoModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.getElementById('cadastroCompletoForm')?.reset();
     }
-    
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(event) {
-        const notifDropdown = document.getElementById('notificationsDropdown');
-        const profileDropdown = document.getElementById('profileDropdown');
-        
-        if (!event.target.closest('.btn-icon') && !event.target.closest('.notifications-dropdown')) {
-            notifDropdown.classList.remove('show');
+}
+
+function closeCadastroCompletoModal() {
+    const modal = document.getElementById('cadastroCompletoModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Form validation for cadastro completo
+document.getElementById('cadastroNome')?.addEventListener('input', function() {
+    const icon = this.nextElementSibling;
+    if (this.value.length >= 3) {
+        this.style.borderColor = '#10b981';
+        this.style.background = 'rgba(16,185,129,0.05)';
+        if (icon) {
+            icon.style.opacity = '1';
+            icon.style.color = '#10b981';
         }
+    } else {
+        this.style.borderColor = 'rgba(255,255,255,0.1)';
+        this.style.background = 'rgba(255,255,255,0.05)';
+        if (icon) icon.style.opacity = '0';
+    }
+});
+
+document.getElementById('cadastroEmail')?.addEventListener('input', function() {
+    const icon = this.nextElementSibling;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(this.value)) {
+        this.style.borderColor = '#10b981';
+        this.style.background = 'rgba(16,185,129,0.05)';
+        if (icon) {
+            icon.style.opacity = '1';
+            icon.style.color = '#10b981';
+        }
+    } else {
+        this.style.borderColor = 'rgba(255,255,255,0.1)';
+        this.style.background = 'rgba(255,255,255,0.05)';
+        if (icon) icon.style.opacity = '0';
+    }
+});
+
+document.getElementById('cadastroTelefone')?.addEventListener('input', function() {
+    const icon = this.nextElementSibling;
+    const telefoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+    if (telefoneRegex.test(this.value)) {
+        this.style.borderColor = '#10b981';
+        this.style.background = 'rgba(16,185,129,0.05)';
+        if (icon) {
+            icon.style.opacity = '1';
+            icon.style.color = '#10b981';
+        }
+    } else {
+        this.style.borderColor = 'rgba(255,255,255,0.1)';
+        this.style.background = 'rgba(255,255,255,0.05)';
+        if (icon) icon.style.opacity = '0';
+    }
+});
+
+// Cadastro completo form submission
+document.getElementById('cadastroCompletoForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span style="animation: spin 1s linear infinite;">⏳</span> <span>Processando...</span>';
+    
+    try {
+        const clienteData = {
+            nome: document.getElementById('cadastroNome').value.trim(),
+            email: document.getElementById('cadastroEmail').value.trim(),
+            telefone: document.getElementById('cadastroTelefone').value.trim(),
+            empresa: document.getElementById('cadastroEmpresa').value.trim() || '',
+            fonte: document.getElementById('cadastroFonte').value || 'site',
+            status: 'novo',
+            observacoes: document.getElementById('cadastroMensagem').value.trim() || ''
+        };
+
+        const response = await fetch('/api/crm/cliente', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(clienteData)
+        });
+
+        const result = await response.json();
         
-        if (!event.target.closest('.user-profile') && !event.target.closest('.profile-dropdown')) {
-            profileDropdown.classList.remove('show');
-            document.querySelector('.user-profile')?.classList.remove('active');
+        if (result.success) {
+            btn.innerHTML = '<span>✅</span> <span>Cadastrado com Sucesso!</span>';
+            setTimeout(() => {
+                closeCadastroCompletoModal();
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                // Reload CRM data if on CRM section
+                if (window.currentSection === 'crm') {
+                    loadLeads();
+                }
+            }, 2000);
+        } else {
+            throw new Error(result.error || 'Erro ao cadastrar');
+        }
+    } catch (error) {
+        console.error('Erro ao cadastrar:', error);
+        btn.innerHTML = '<span>❌</span> <span>Erro ao Cadastrar</span>';
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }, 2000);
+    }
+});
+
+// Close cadastro modal on overlay click
+document.getElementById('cadastroCompletoModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'cadastroCompletoModal') {
+        closeCadastroCompletoModal();
+    }
+});
+
+// ===== LINKEDIN AUTOMATION MODAL =====
+let linkedinAutomationActive = false;
+let linkedinStats = {
+    connectionsToday: 0,
+    messagesSent: 0,
+    engagements: 0,
+    acceptanceRate: 0
+};
+
+function openLinkedinAutomationModal() {
+    const modal = document.getElementById('linkedinAutomationModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        updateLinkedinStats();
+    }
+}
+
+function closeLinkedinAutomationModal() {
+    const modal = document.getElementById('linkedinAutomationModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function updateLinkedinStats() {
+    document.getElementById('linkedinConnectionsToday').textContent = linkedinStats.connectionsToday;
+    document.getElementById('linkedinMessagesSent').textContent = linkedinStats.messagesSent;
+    document.getElementById('linkedinEngagements').textContent = linkedinStats.engagements;
+    document.getElementById('linkedinAcceptanceRate').textContent = linkedinStats.acceptanceRate + '%';
+}
+
+function addLinkedinLogEntry(message, type = 'info') {
+    const log = document.getElementById('linkedinActivityLog');
+    if (!log) return;
+    
+    // Remove "no activity" message
+    if (log.querySelector('div[style*="text-align: center"]')) {
+        log.innerHTML = '';
+    }
+    
+    const timestamp = new Date().toLocaleTimeString('pt-BR');
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        info: '#3b82f6',
+        warning: '#f59e0b'
+    };
+    
+    const entry = document.createElement('div');
+    entry.style.cssText = `
+        padding: 12px;
+        background: rgba(255,255,255,0.03);
+        border-left: 3px solid ${colors[type]};
+        border-radius: 6px;
+        font-size: 14px;
+        color: rgba(255,255,255,0.8);
+    `;
+    entry.innerHTML = `<span style="color: rgba(255,255,255,0.4);">${timestamp}</span> - ${message}`;
+    
+    log.insertBefore(entry, log.firstChild);
+    
+    // Keep only last 50 entries
+    while (log.children.length > 50) {
+        log.removeChild(log.lastChild);
+    }
+}
+
+async function startLinkedinConnections() {
+    const dailyLimit = parseInt(document.getElementById('linkedinDailyLimit')?.value || 20);
+    const message = document.getElementById('linkedinInviteMessage')?.value;
+    
+    addLinkedinLogEntry(`🚀 Iniciando envio de convites (limite: ${dailyLimit}/dia)`, 'info');
+    
+    try {
+        // Simulated API call - replace with actual LinkedIn automation
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        linkedinStats.connectionsToday += 1;
+        updateLinkedinStats();
+        addLinkedinLogEntry('✅ Convite enviado com sucesso', 'success');
+    } catch (error) {
+        addLinkedinLogEntry('❌ Erro ao enviar convite', 'error');
+    }
+}
+
+async function startLinkedinMessages() {
+    addLinkedinLogEntry('📨 Iniciando envio de mensagens...', 'info');
+    
+    try {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        linkedinStats.messagesSent += 1;
+        updateLinkedinStats();
+        addLinkedinLogEntry('✅ Mensagem enviada', 'success');
+    } catch (error) {
+        addLinkedinLogEntry('❌ Erro ao enviar mensagem', 'error');
+    }
+}
+
+async function startLinkedinLikes() {
+    addLinkedinLogEntry('👍 Curtindo posts relevantes...', 'info');
+    
+    try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        linkedinStats.engagements += 1;
+        updateLinkedinStats();
+        addLinkedinLogEntry('✅ Post curtido', 'success');
+    } catch (error) {
+        addLinkedinLogEntry('❌ Erro ao curtir post', 'error');
+    }
+}
+
+async function startLinkedinComments() {
+    addLinkedinLogEntry('💬 Comentando em posts...', 'info');
+    
+    try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        linkedinStats.engagements += 1;
+        updateLinkedinStats();
+        addLinkedinLogEntry('✅ Comentário publicado', 'success');
+    } catch (error) {
+        addLinkedinLogEntry('❌ Erro ao comentar', 'error');
+    }
+}
+
+// Close linkedin modal on overlay click
+document.getElementById('linkedinAutomationModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'linkedinAutomationModal') {
+        closeLinkedinAutomationModal();
+    }
+
+});
+
+// ==========================================
+// CADASTRO COMPLETO MODAL
+// ==========================================
+
+function openCadastroCompleto() {
+    const modal = document.getElementById('cadastroCompletoModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Reset form
+        document.getElementById('cadastroInitialForm').style.display = 'block';
+        document.getElementById('cadastroPatentSection').style.display = 'none';
+        document.getElementById('cadastroCompletoForm')?.reset();
+    }
+}
+
+function closeCadastroCompleto() {
+    const modal = document.getElementById('cadastroCompletoModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Validação em tempo real
+const cadastroInputs = {
+    nome: document.getElementById('cadastroNome'),
+    email: document.getElementById('cadastroEmail'),
+    telefone: document.getElementById('cadastroTelefone'),
+    empresa: document.getElementById('cadastroEmpresa')
+};
+
+const cadastroIcons = {
+    nome: document.getElementById('cadastroNomeIcon'),
+    email: document.getElementById('cadastroEmailIcon'),
+    telefone: document.getElementById('cadastroTelefoneIcon'),
+    empresa: document.getElementById('cadastroEmpresaIcon')
+};
+
+function validateCadastroInput(field, value) {
+    const input = cadastroInputs[field];
+    const icon = cadastroIcons[field];
+    
+    if (!input || !icon) return;
+    
+    let isValid = false;
+    
+    switch(field) {
+        case 'nome':
+            isValid = value.length >= 3;
+            break;
+        case 'email':
+            isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+            break;
+        case 'telefone':
+            isValid = value.length >= 10;
+            break;
+        case 'empresa':
+            isValid = value.length >= 2;
+            break;
+    }
+    
+    if (value.length > 0) {
+        if (isValid) {
+            input.classList.add('input-valid');
+            input.classList.remove('input-invalid');
+            icon.textContent = '✓';
+            icon.style.color = '#10b981';
+            icon.classList.add('show');
+        } else {
+            input.classList.add('input-invalid');
+            input.classList.remove('input-valid');
+            icon.textContent = '✗';
+            icon.style.color = '#ef4444';
+            icon.classList.add('show');
+        }
+    } else {
+        input.classList.remove('input-valid', 'input-invalid');
+        icon.classList.remove('show');
+    }
+}
+
+// Add event listeners
+Object.keys(cadastroInputs).forEach(key => {
+    cadastroInputs[key]?.addEventListener('input', (e) => {
+        validateCadastroInput(key, e.target.value);
+    });
+});
+
+// Form submission
+document.getElementById('cadastroCompletoForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        nome: document.getElementById('cadastroNome').value,
+        empresa: document.getElementById('cadastroEmpresa').value,
+        email: document.getElementById('cadastroEmail').value,
+        telefone: document.getElementById('cadastroTelefone').value,
+        tipoProjeto: document.getElementById('cadastroTipoProjeto').value,
+        orcamento: document.getElementById('cadastroOrcamento').value,
+        descricao: document.getElementById('cadastroDescricao').value
+    };
+    
+    const submitBtn = e.target.querySelector('.cadastro-submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+    submitBtn.innerHTML = '<span>🔄</span> Processing...';
+    
+    try {
+        const response = await fetch(`${API_BASE}/crm/leads/webhook`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Show patent section
+            document.getElementById('cadastroInitialForm').style.display = 'none';
+            const patentSection = document.getElementById('cadastroPatentSection');
+            patentSection.style.display = 'block';
+            setTimeout(() => patentSection.classList.add('show'), 100);
+            
+            // Reset button
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+            submitBtn.innerHTML = '<span>🚀</span> Start Your Project';
+        } else {
+            throw new Error(result.error || 'Submission failed');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(`❌ ${error.message}`);
+        
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.innerHTML = '<span>🔄</span> Try Again';
+    }
+});
+
+// Patent selection
+let selectedPatentOption = null;
+
+function selectPatentOption(option) {
+    selectedPatentOption = option;
+    
+    const yesOption = document.getElementById('patentYes');
+    const noOption = document.getElementById('patentNo');
+    const fields = document.getElementById('patentFields');
+    
+    if (option === 'yes') {
+        yesOption.classList.add('selected');
+        noOption.classList.remove('selected');
+        fields.style.display = 'block';
+    } else {
+        yesOption.classList.remove('selected');
+        noOption.classList.add('selected');
+        fields.style.display = 'none';
+    }
+}
+
+// File upload
+document.getElementById('patentFile')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('fileName').textContent = `📄 ${file.name}`;
+    }
+});
+
+function completeCadastro() {
+    alert('✅ Cadastro completo! Em breve entraremos em contato.');
+    closeCadastroCompleto();
+}
+
+// Close on overlay click
+document.getElementById('cadastroCompletoModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'cadastroCompletoModal') {
+        closeCadastroCompleto();
+    }
+});
+
+// ==========================================
+// LINKEDIN AUTOMATION
+// ==========================================
+
+let linkedInConsoleLines = [];
+
+function addLinkedInConsoleLog(message, type = 'info') {
+    const console = document.getElementById('linkedinConsole');
+    if (!console) return;
+    
+    const line = document.createElement('div');
+    line.className = 'console-line';
+    
+    const icon = type === 'success' ? '✅' : 
+                type === 'error' ? '❌' : 
+                type === 'warning' ? '⚠️' : 'ℹ️';
+    
+    line.textContent = `${icon} ${new Date().toLocaleTimeString()} - ${message}`;
+    console.appendChild(line);
+    console.scrollTop = console.scrollHeight;
+    
+    linkedInConsoleLines.push({ message, type, timestamp: new Date() });
+}
+
+async function executeLinkedInAction(action) {
+    const loading = document.getElementById('linkedinLoading');
+    if (loading) loading.style.display = 'block';
+    
+    addLinkedInConsoleLog(`Executando: ${action}`, 'info');
+    
+    try {
+        const response = await fetch(`${API_BASE}/linkedin-automation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            addLinkedInConsoleLog(`${action} executado com sucesso!`, 'success');
+            updateLinkedInStatus(action);
+        } else {
+            addLinkedInConsoleLog(`Erro ao executar ${action}: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        addLinkedInConsoleLog(`Erro de conexão: ${error.message}`, 'error');
+    } finally {
+        if (loading) loading.style.display = 'none';
+    }
+}
+
+function updateLinkedInStatus(action) {
+    document.getElementById('linkedin-last-action').textContent = action;
+    
+    // Update counters
+    const postsCount = document.getElementById('linkedin-posts-count');
+    if (action.includes('post') && postsCount) {
+        postsCount.textContent = parseInt(postsCount.textContent) + 1;
+    }
+    
+    const connectionsCount = document.getElementById('linkedin-connections-count');
+    if ((action.includes('recruiter') || action.includes('techlead')) && connectionsCount) {
+        connectionsCount.textContent = parseInt(connectionsCount.textContent) + 5;
+    }
+    
+    if (action.includes('campaign')) {
+        const campaignStatus = document.getElementById('linkedin-campaign-status');
+        if (campaignStatus) {
+            campaignStatus.textContent = 'BMW (Ativa)';
+            campaignStatus.className = 'status-badge status-success';
+        }
+    }
+}
+
+function openLinkedInConfig() {
+    addLinkedInConsoleLog('Abrindo configurações...', 'info');
+    alert('Edite o arquivo .env na raiz do projeto com suas credenciais LinkedIn');
+}
+
+async function testLinkedInConnection() {
+    addLinkedInConsoleLog('Testando conexão com LinkedIn API...', 'info');
+    
+    try {
+        const response = await fetch(`${API_BASE}/linkedin-test`);
+        const result = await response.json();
+        
+        if (result.connected) {
+            addLinkedInConsoleLog('Conexão OK! ✅', 'success');
+            const apiStatus = document.getElementById('linkedin-api-status');
+            if (apiStatus) {
+                apiStatus.textContent = 'Conectado';
+                apiStatus.className = 'status-badge status-success';
+            }
+        } else {
+            addLinkedInConsoleLog('Erro de conexão! Verifique credenciais.', 'error');
+            const apiStatus = document.getElementById('linkedin-api-status');
+            if (apiStatus) {
+                apiStatus.textContent = 'Erro';
+                apiStatus.className = 'status-badge status-danger';
+            }
+        }
+    } catch (error) {
+        addLinkedInConsoleLog(`Erro: ${error.message}`, 'error');
+    }
+}
+
+function viewLinkedInLogs() {
+    addLinkedInConsoleLog('Exibindo logs completos...', 'info');
+    const logs = linkedInConsoleLines.map(log => 
+        `[${log.timestamp.toLocaleString()}] ${log.type.toUpperCase()}: ${log.message}`
+    ).join('\n');
+    
+    alert(logs || 'Nenhum log ainda');
+}
+
+// Update status every 5 seconds
+setInterval(async () => {
+    try {
+        const response = await fetch(`${API_BASE}/linkedin-status`);
+        const status = await response.json();
+        
+        if (status.postsThisWeek !== undefined) {
+            document.getElementById('linkedin-posts-count').textContent = status.postsThisWeek;
+        }
+        if (status.newConnections !== undefined) {
+            document.getElementById('linkedin-connections-count').textContent = status.newConnections;
+        }
+    } catch (error) {
+        // Silently fail
+    }
+}, 5000);
+
+// ===== CONTATOS UNIFICADOS =====
+
+async function loadContactsUnified() {
+    const container = document.getElementById('contacts-container');
+    container.innerHTML = '<div class="loading">⏳ Carregando contatos unificados...</div>';
+
+    try {
+        const response = await fetch(`${API_BASE}/contacts/unified`);
+
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.contacts && data.contacts.length > 0) {
+            // Atualizar estatísticas
+            document.getElementById('total-contacts').textContent = data.total || data.contacts.length;
+            document.getElementById('empresa-contacts').textContent = data.contacts.filter(c => c.tipo === 'empresa').length;
+            document.getElementById('pessoal-contacts').textContent = data.contacts.filter(c => c.tipo === 'pessoal').length;
+            document.getElementById('telefone-contacts').textContent = data.contacts.filter(c => c.telefone).length;
+
+            let html = `
+                <table class="data-table-content">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Telefone</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Origem</th>
+                            <th>Endereço</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.contacts.forEach(contact => {
+                const endereco = contact.endereco ?
+                    `${contact.endereco.cidade || ''} ${contact.endereco.uf || ''}`.trim() || '-' : '-';
+
+                html += `
+                    <tr>
+                        <td>${contact.nome || '-'}</td>
+                        <td>${contact.telefone || '-'}</td>
+                        <td>${contact.email || '-'}</td>
+                        <td><span class="type-badge type-${contact.tipo || 'desconhecido'}">${contact.tipo || 'desconhecido'}</span></td>
+                        <td><span class="source-badge">${contact.origem || 'desconhecido'}</span></td>
+                        <td>${endereco}</td>
+                        <td>
+                            <button class="btn-icon" onclick="viewContactDetails('${contact._id}')" title="Ver detalhes">👁️</button>
+                            <button class="btn-icon" onclick="editContact('${contact._id}')" title="Editar">✏️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<div class="empty-state">📞 Nenhum contato encontrado</div>';
+        }
+    } catch (error) {
+        container.innerHTML = `<div class="error">❌ Erro ao carregar contatos: ${error.message}</div>`;
+    }
+}
+
+function filterContacts() {
+    const searchTerm = document.getElementById('contacts-search').value.toLowerCase();
+    const typeFilter = document.getElementById('contacts-type-filter').value;
+    const originFilter = document.getElementById('contacts-origin-filter').value;
+
+    const rows = document.querySelectorAll('#contacts-container tbody tr');
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const nome = cells[0].textContent.toLowerCase();
+        const telefone = cells[1].textContent.toLowerCase();
+        const email = cells[2].textContent.toLowerCase();
+        const tipo = cells[3].textContent.toLowerCase();
+        const origem = cells[4].textContent.toLowerCase();
+
+        const matchesSearch = nome.includes(searchTerm) ||
+                             telefone.includes(searchTerm) ||
+                             email.includes(searchTerm);
+
+        const matchesType = !typeFilter || tipo.includes(typeFilter.toLowerCase());
+        const matchesOrigin = !originFilter || origem.includes(originFilter.toLowerCase());
+
+        if (matchesSearch && matchesType && matchesOrigin) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
         }
     });
 }
 
-function toggleNotifications() {
-    const dropdown = document.getElementById('notificationsDropdown');
-    const profileDropdown = document.getElementById('profileDropdown');
-    
-    profileDropdown.classList.remove('show');
-    dropdown.classList.toggle('show');
-    
-    // Mark all as read
-    notificationsData.forEach(n => n.unread = false);
-    updateNotificationBadge();
-    renderNotifications();
-    saveNotifications();
-}
+async function exportContactsCSV() {
+    try {
+        showNotification('📊 Exportando contatos para CSV...', 'info');
 
-function addNotification(type, title, message, unread = true) {
-    const icons = {
-        info: 'ℹ️',
-        success: '✅',
-        warning: '⚠️',
-        error: '❌',
-        reading: '📚',
-        email: '📧',
-        backup: '💾'
-    };
-    
-    const notification = {
-        id: Date.now(),
-        type,
-        icon: icons[type] || 'ℹ️',
-        title,
-        message,
-        time: new Date().toISOString(),
-        unread
-    };
-    
-    notificationsData.unshift(notification);
-    
-    // Keep only last 50 notifications
-    if (notificationsData.length > 50) {
-        notificationsData = notificationsData.slice(0, 50);
+        const response = await fetch(`${API_BASE}/contacts/export/csv`);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `contatos_unificados_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        showNotification('✅ Exportação CSV concluída!', 'success');
+    } catch (error) {
+        console.error('Erro na exportação:', error);
+        showNotification('❌ Erro ao exportar CSV: ' + error.message, 'error');
     }
-    
-    updateNotificationBadge();
-    renderNotifications();
-    saveNotifications();
 }
 
-function renderNotifications() {
-    const list = document.getElementById('notificationsList');
-    if (!list) return;
+async function showContactStats() {
+    try {
+        const response = await fetch(`${API_BASE}/contacts/stats`);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const stats = await response.json();
+
+        let message = `📊 Estatísticas dos Contatos:\n\n`;
+        message += `Total: ${stats.total}\n`;
+        message += `Empresas: ${stats.empresas}\n`;
+        message += `Pessoal: ${stats.pessoal}\n`;
+        message += `Serviços: ${stats.servicos}\n`;
+        message += `Com telefone: ${stats.comTelefone}\n`;
+        message += `Com email: ${stats.comEmail}\n`;
+
+        alert(message);
+    } catch (error) {
+        console.error('Erro ao obter estatísticas:', error);
+        showNotification('❌ Erro ao obter estatísticas: ' + error.message, 'error');
+    }
+}
+
+function viewContactDetails(contactId) {
+    // Implementar visualização de detalhes do contato
+    showNotification('👁️ Funcionalidade de visualização em desenvolvimento', 'info');
+}
+
+function editContact(contactId) {
+    // Implementar edição do contato
+    showNotification('✏️ Funcionalidade de edição em desenvolvimento', 'info');
+}
+
+// Alias para manter compatibilidade
+const loadContacts = loadContactsUnified;
+
+// ==================== FUNÇÕES DE CAMPANHAS ====================
+
+// Carregar dados das campanhas
+async function loadCampanhasData() {
+    try {
+        const response = await fetch(`${API_BASE}/campanhas`);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            atualizarResumoCampanhas(data.campanhas);
+            renderizarCampanhas(data.campanhas);
+            verificarAlertasCampanhas(data.campanhas);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar campanhas:', error);
+        showNotification('❌ Erro ao carregar campanhas: ' + error.message, 'error');
+    }
+}
+
+// Atualizar resumo das campanhas
+function atualizarResumoCampanhas(campanhas) {
+    const totalCampanhas = campanhas.length;
+    const totalOrcamento = campanhas.reduce((sum, c) => sum + (c.orcamento || 0), 0);
+    const totalConversoes = campanhas.reduce((sum, c) => sum + (c.conversoes || 0), 0);
+    const roasMedio = campanhas.length > 0 ? 
+        campanhas.reduce((sum, c) => sum + (c.roas || 0), 0) / campanhas.length : 0;
+
+    document.getElementById('total-campanhas').textContent = totalCampanhas;
+    document.getElementById('total-orcamento').textContent = `R$ ${totalOrcamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('total-conversoes').textContent = totalConversoes;
+    document.getElementById('roas-medio').textContent = roasMedio.toFixed(2);
+}
+
+// Renderizar lista de campanhas
+function renderizarCampanhas(campanhas) {
+    const container = document.getElementById('campanhas-list');
     
-    if (notificationsData.length === 0) {
-        list.innerHTML = `
-            <div class="notification-empty">
-                <div class="notification-empty-icon">🔔</div>
-                <p>Nenhuma notificação</p>
+    if (campanhas.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span>📈</span>
+                <p>Nenhuma campanha criada ainda</p>
+                <button class="btn-secondary" onclick="openNovaCampanhaModal()">Criar Primeira Campanha</button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = campanhas.map(campanha => `
+        <div class="campaign-card" onclick="verDetalhesCampanha('${campanha._id}')">
+            <div class="campaign-header">
+                <h4>${campanha.nome}</h4>
+                <span class="campaign-platform">${getPlatformIcon(campanha.plataforma)} ${campanha.plataforma}</span>
+            </div>
+            <div class="campaign-metrics">
+                <div class="metric">
+                    <span class="metric-value">R$ ${campanha.orcamento?.toLocaleString('pt-BR', {minimumFractionDigits: 2}) || '0,00'}</span>
+                    <span class="metric-label">Orçamento</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">${campanha.roas?.toFixed(2) || '0.00'}</span>
+                    <span class="metric-label">ROAS</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">R$ ${campanha.cpa?.toFixed(2) || '0.00'}</span>
+                    <span class="metric-label">CPA</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-value">${campanha.conversoes || 0}</span>
+                    <span class="metric-label">Conversões</span>
+                </div>
+            </div>
+            <div class="campaign-status">
+                <span class="status-${getStatusClass(campanha.status)}">${getStatusText(campanha.status)}</span>
+                <span class="campaign-dates">${formatDate(campanha.dataInicio)} - ${formatDate(campanha.dataFim)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Verificar alertas de campanhas
+function verificarAlertasCampanhas(campanhas) {
+    const alertas = [];
+    
+    campanhas.forEach(campanha => {
+        // Verificar CPA alto
+        if (campanha.cpa > campanha.cpaAlvo * 1.5) {
+            alertas.push({
+                tipo: 'cpa-alto',
+                campanha: campanha.nome,
+                mensagem: `CPA atual (R$ ${campanha.cpa.toFixed(2)}) está 50% acima do alvo (R$ ${campanha.cpaAlvo.toFixed(2)})`,
+                severidade: 'alta'
+            });
+        }
+        
+        // Verificar ROAS baixo
+        if (campanha.roas < campanha.roasAlvo * 0.7) {
+            alertas.push({
+                tipo: 'roas-baixo',
+                campanha: campanha.nome,
+                mensagem: `ROAS atual (${campanha.roas.toFixed(2)}) está 30% abaixo do alvo (${campanha.roasAlvo.toFixed(2)})`,
+                severidade: 'alta'
+            });
+        }
+        
+        // Verificar orçamento restante baixo
+        const diasRestantes = Math.ceil((new Date(campanha.dataFim) - new Date()) / (1000 * 60 * 60 * 24));
+        if (diasRestantes <= 7 && campanha.orcamentoRestante < campanha.orcamento * 0.2) {
+            alertas.push({
+                tipo: 'orcamento-baixo',
+                campanha: campanha.nome,
+                mensagem: `Orçamento restante baixo com apenas ${diasRestantes} dias restantes`,
+                severidade: 'media'
+            });
+        }
+    });
+    
+    renderizarAlertas(alertas);
+}
+
+// Renderizar alertas
+function renderizarAlertas(alertas) {
+    const container = document.getElementById('alertas-campanhas');
+    
+    if (alertas.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span>✅</span>
+                <p>Todas as campanhas otimizadas</p>
             </div>
         `;
         return;
     }
     
-    list.innerHTML = notificationsData.map(notif => {
-        const timeAgo = getTimeAgo(new Date(notif.time));
-        return `
-            <div class="notification-item ${notif.unread ? 'unread' : ''}" 
-                 onclick="markAsRead(${notif.id})">
-                <span class="notification-icon">${notif.icon}</span>
-                <div class="notification-content">
-                    <p class="notification-title">${notif.title}</p>
-                    ${notif.message ? `<p class="notification-time">${notif.message}</p>` : ''}
-                    <p class="notification-time">${timeAgo}</p>
-                </div>
+    container.innerHTML = alertas.slice(0, 5).map(alerta => `
+        <div class="alert-card alert-${alerta.severidade}" onclick="verAlertaDetalhes('${alerta.campanha}', '${alerta.tipo}')">
+            <div class="alert-icon">${getAlertIcon(alerta.tipo)}</div>
+            <div class="alert-content">
+                <div class="alert-title">${alerta.campanha}</div>
+                <div class="alert-message">${alerta.mensagem}</div>
             </div>
-        `;
-    }).join('');
-}
-
-function updateNotificationBadge() {
-    const badge = document.getElementById('notificationBadge');
-    if (!badge) return;
+        </div>
+    `).join('');
     
-    const unreadCount = notificationsData.filter(n => n.unread).length;
-    badge.textContent = unreadCount;
-    badge.style.display = unreadCount > 0 ? 'block' : 'none';
-}
-
-function markAsRead(id) {
-    const notif = notificationsData.find(n => n.id === id);
-    if (notif) {
-        notif.unread = false;
-        updateNotificationBadge();
-        renderNotifications();
-        saveNotifications();
+    if (alertas.length > 5) {
+        container.innerHTML += `<div class="alert-more">+${alertas.length - 5} alertas...</div>`;
     }
 }
 
-function clearAllNotifications() {
-    if (confirm('Deseja limpar todas as notificações?')) {
-        notificationsData = [];
-        updateNotificationBadge();
-        renderNotifications();
-        saveNotifications();
-    }
+// Funções auxiliares para campanhas
+function getPlatformIcon(plataforma) {
+    const icons = {
+        'google-ads': '🎯',
+        'facebook-ads': '📘',
+        'instagram-ads': '📷',
+        'linkedin-ads': '💼',
+        'tiktok-ads': '🎵',
+        'outros': '📢'
+    };
+    return icons[plataforma] || '📢';
 }
 
-function viewAllNotifications() {
-    alert('Página de histórico de notificações em desenvolvimento!');
+function getStatusClass(status) {
+    const classes = {
+        'ativa': 'success',
+        'pausada': 'warning',
+        'finalizada': 'secondary',
+        'cancelada': 'danger'
+    };
+    return classes[status] || 'secondary';
 }
 
-function saveNotifications() {
-    localStorage.setItem('notifications', JSON.stringify(notificationsData));
+function getStatusText(status) {
+    const texts = {
+        'ativa': 'Ativa',
+        'pausada': 'Pausada',
+        'finalizada': 'Finalizada',
+        'cancelada': 'Cancelada'
+    };
+    return texts[status] || 'Desconhecido';
 }
 
-function getTimeAgo(date) {
-    const seconds = Math.floor((new Date() - date) / 1000);
-    
-    if (seconds < 60) return 'Agora';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}min atrás`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h atrás`;
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d atrás`;
-    
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
 }
 
-// ============================================
-// PROFILE MENU
-// ============================================
-
-function toggleProfileMenu() {
-    const dropdown = document.getElementById('profileDropdown');
-    const notifDropdown = document.getElementById('notificationsDropdown');
-    const profileBtn = document.querySelector('.user-profile');
-    
-    notifDropdown.classList.remove('show');
-    dropdown.classList.toggle('show');
-    profileBtn.classList.toggle('active');
+function getAlertIcon(tipo) {
+    const icons = {
+        'cpa-alto': '💰',
+        'roas-baixo': '📉',
+        'orcamento-baixo': '⚠️'
+    };
+    return icons[tipo] || '🚨';
 }
 
-function editProfile() {
-    alert('Edição de perfil em desenvolvimento!\n\nEm breve você poderá:\n• Alterar foto\n• Editar informações\n• Configurar preferências');
-    document.getElementById('profileDropdown').classList.remove('show');
+// Funções dos modais
+function openNovaCampanhaModal() {
+    document.getElementById('nova-campanha-modal').style.display = 'block';
 }
 
-async function viewStatistics() {
-    document.getElementById('profileDropdown').classList.remove('show');
+function closeNovaCampanhaModal() {
+    document.getElementById('nova-campanha-modal').style.display = 'none';
+    document.getElementById('nova-campanha-form').reset();
+}
+
+function openAlertasModal() {
+    loadAlertasDetalhes();
+    document.getElementById('alertas-modal').style.display = 'block';
+}
+
+function closeAlertasModal() {
+    document.getElementById('alertas-modal').style.display = 'none';
+}
+
+// Criar nova campanha
+async function criarCampanha() {
+    const form = document.getElementById('nova-campanha-form');
+    const formData = new FormData(form);
     
-    // Mostrar loading
-    const statsHTML = `
-        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                    background: rgba(0,0,0,0.95); padding: 40px; border-radius: 16px; 
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.5); z-index: 10001; min-width: 400px;
-                    color: white; font-family: system-ui;" id="statsModal">
-            <div style="text-align: center; font-size: 18px; margin-bottom: 20px;">
-                ⏳ Carregando estatísticas reais...
-            </div>
-        </div>
-        <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000;" 
-             id="statsOverlay" onclick="closeStatsModal()"></div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', statsHTML);
+    const campanha = {
+        nome: formData.get('campanha-nome'),
+        plataforma: formData.get('campanha-plataforma'),
+        orcamento: parseFloat(formData.get('campanha-orcamento')),
+        cpaAlvo: parseFloat(formData.get('campanha-cpa-alvo')),
+        roasAlvo: parseFloat(formData.get('campanha-roas-alvo')),
+        dataInicio: formData.get('campanha-data-inicio'),
+        dataFim: formData.get('campanha-data-fim'),
+        status: 'ativa'
+    };
     
     try {
-        // Buscar dados reais do backend
-        const [ereaderRes, contactsRes, gmailRes] = await Promise.all([
-            fetch('/api/ereader/estatisticas').catch(() => null),
-            fetch('/api/crm/contacts').catch(() => null),
-            fetch('/api/gmail/stats').catch(() => null)
-        ]);
+        const response = await fetch(`${API_BASE}/campanhas`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(campanha)
+        });
         
-        // Parse das respostas
-        const ereaderData = ereaderRes?.ok ? await ereaderRes.json() : null;
-        const contactsData = contactsRes?.ok ? await contactsRes.json() : null;
-        const gmailData = gmailRes?.ok ? await gmailRes.json() : null;
-        
-        // Extrair estatísticas reais
-        const stats = {
-            diasConsecutivos: ereaderData?.estatisticas?.diasConsecutivos || 0,
-            paginasLidas: ereaderData?.estatisticas?.paginasLidas || 0,
-            entradasDiario: ereaderData?.estatisticas?.entradasDiario || 0,
-            contatos: contactsData?.total || 0,
-            emails: gmailData?.totalEmails || 0
-        };
-        
-        // Atualizar modal com dados reais
-        const modalContent = `
-            <div style="text-align: left;">
-                <h2 style="text-align: center; margin: 0 0 30px 0; font-size: 24px; color: #3b82f6;">
-                    📊 Estatísticas do usuário
-                </h2>
-                <div style="display: grid; gap: 16px; font-size: 16px; line-height: 1.8;">
-                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(16,185,129,0.1); border-radius: 8px; border-left: 4px solid #10b981;">
-                        <span style="font-size: 24px;">✅</span>
-                        <div>
-                            <strong>Meta de leitura:</strong> ${stats.diasConsecutivos} dias consecutivos
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(59,130,246,0.1); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                        <span style="font-size: 24px;">📖</span>
-                        <div>
-                            <strong>Páginas lidas:</strong> ${stats.paginasLidas.toLocaleString('pt-BR')} total
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(139,92,246,0.1); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                        <span style="font-size: 24px;">📔</span>
-                        <div>
-                            <strong>Entradas no diário:</strong> ${stats.entradasDiario}
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(245,158,11,0.1); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                        <span style="font-size: 24px;">🤝</span>
-                        <div>
-                            <strong>Contatos gerenciados:</strong> ${stats.contatos.toLocaleString('pt-BR')}
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(236,72,153,0.1); border-radius: 8px; border-left: 4px solid #ec4899;">
-                        <span style="font-size: 24px;">📧</span>
-                        <div>
-                            <strong>Emails sincronizados:</strong> ${stats.emails > 0 ? stats.emails.toLocaleString('pt-BR') : 'Aguardando sincronização'}
-                        </div>
-                    </div>
-                </div>
-                <button onclick="closeStatsModal()" 
-                        style="width: 100%; margin-top: 30px; padding: 14px; background: #3b82f6; 
-                               color: white; border: none; border-radius: 8px; font-size: 16px; 
-                               font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                        onmouseover="this.style.background='#2563eb'" 
-                        onmouseout="this.style.background='#3b82f6'">
-                    OK
-                </button>
-            </div>
-        `;
-        
-        document.getElementById('statsModal').innerHTML = modalContent;
-        
-    } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error);
-        document.getElementById('statsModal').innerHTML = `
-            <div style="text-align: center;">
-                <div style="font-size: 48px; margin-bottom: 20px;">❌</div>
-                <div style="font-size: 18px; margin-bottom: 20px;">
-                    Erro ao carregar estatísticas
-                </div>
-                <button onclick="closeStatsModal()" 
-                        style="padding: 12px 24px; background: #3b82f6; color: white; 
-                               border: none; border-radius: 8px; cursor: pointer;">
-                    Fechar
-                </button>
-            </div>
-        `;
-    }
-}
-
-function closeStatsModal() {
-    document.getElementById('statsModal')?.remove();
-    document.getElementById('statsOverlay')?.remove();
-}
-
-function openHelp() {
-    window.open('/docs/MANUAL_COMPLETO.md', '_blank');
-    document.getElementById('profileDropdown').classList.remove('show');
-}
-
-function logout() {
-    if (confirm('Deseja realmente sair do sistema?')) {
-        // Clear user data
-        localStorage.removeItem('user');
-        // Redirect to login
-        window.location.href = '/login.html';
-    }
-}
-
-// ============================================
-// SETTINGS MODAL
-// ============================================
-
-let userSettings = {
-    language: 'pt-BR',
-    readingGoal: 10,
-    autoSave: true,
-    autoBackup: true,
-    theme: 'light',
-    fontSize: 'medium',
-    animations: true,
-    notifyMeta: true,
-    notifyEmail: true,
-    notifyBackup: true,
-    notifyReminders: true,
-    name: 'Nicolas Rosa',
-    email: 'nicolas@avila.com',
-    phone: ''
-};
-
-function loadUserSettings() {
-    const saved = localStorage.getItem('userSettings');
-    if (saved) {
-        userSettings = { ...userSettings, ...JSON.parse(saved) };
-    }
-    applySettings();
-}
-
-function applySettings() {
-    // Apply theme
-    document.body.setAttribute('data-theme', userSettings.theme);
-    
-    // Apply font size
-    document.body.setAttribute('data-font-size', userSettings.fontSize);
-    
-    // Update E-Reader meta if available
-    if (window.ereaderSystem) {
-        ereaderSystem.metaDiaria = userSettings.readingGoal;
-    }
-}
-
-function openSettings() {
-    const modal = document.getElementById('settingsModal');
-    modal.classList.add('show');
-    
-    // Close dropdowns
-    document.getElementById('profileDropdown').classList.remove('show');
-    document.getElementById('notificationsDropdown').classList.remove('show');
-    
-    // Load current settings into form
-    document.getElementById('settingLanguage').value = userSettings.language;
-    document.getElementById('settingReadingGoal').value = userSettings.readingGoal;
-    document.getElementById('settingAutoSave').checked = userSettings.autoSave;
-    document.getElementById('settingAutoBackup').checked = userSettings.autoBackup;
-    document.getElementById('settingTheme').value = userSettings.theme;
-    document.getElementById('settingFontSize').value = userSettings.fontSize;
-    document.getElementById('settingAnimations').checked = userSettings.animations;
-    document.getElementById('settingNotifyMeta').checked = userSettings.notifyMeta;
-    document.getElementById('settingNotifyEmail').checked = userSettings.notifyEmail;
-    document.getElementById('settingNotifyBackup').checked = userSettings.notifyBackup;
-    document.getElementById('settingNotifyReminders').checked = userSettings.notifyReminders;
-    document.getElementById('settingName').value = userSettings.name;
-    document.getElementById('settingEmail').value = userSettings.email;
-    document.getElementById('settingPhone').value = userSettings.phone;
-}
-
-function closeSettings() {
-    document.getElementById('settingsModal').classList.remove('show');
-}
-
-function switchSettingsTab(tabName) {
-    // Remove active from all tabs
-    document.querySelectorAll('.settings-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.settings-tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    
-    // Add active to selected tab
-    event.target.classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-}
-
-function saveSettings() {
-    // Get values from form
-    userSettings.language = document.getElementById('settingLanguage').value;
-    userSettings.readingGoal = parseInt(document.getElementById('settingReadingGoal').value);
-    userSettings.autoSave = document.getElementById('settingAutoSave').checked;
-    userSettings.autoBackup = document.getElementById('settingAutoBackup').checked;
-    userSettings.theme = document.getElementById('settingTheme').value;
-    userSettings.fontSize = document.getElementById('settingFontSize').value;
-    userSettings.animations = document.getElementById('settingAnimations').checked;
-    userSettings.notifyMeta = document.getElementById('settingNotifyMeta').checked;
-    userSettings.notifyEmail = document.getElementById('settingNotifyEmail').checked;
-    userSettings.notifyBackup = document.getElementById('settingNotifyBackup').checked;
-    userSettings.notifyReminders = document.getElementById('settingNotifyReminders').checked;
-    userSettings.name = document.getElementById('settingName').value;
-    userSettings.email = document.getElementById('settingEmail').value;
-    userSettings.phone = document.getElementById('settingPhone').value;
-    
-    // Save to localStorage
-    localStorage.setItem('userSettings', JSON.stringify(userSettings));
-    
-    // Apply settings
-    applySettings();
-    
-    // Update profile display
-    document.querySelectorAll('.user-name').forEach(el => {
-        el.textContent = userSettings.name;
-    });
-    document.getElementById('profileName').textContent = userSettings.name;
-    document.getElementById('profileEmail').textContent = userSettings.email;
-    
-    // Show notification
-    addNotification('success', 'Configurações salvas!', 'Suas preferências foram atualizadas com sucesso');
-    
-    closeSettings();
-}
-
-function changePassword() {
-    const newPassword = prompt('Digite sua nova senha:');
-    if (newPassword && newPassword.length >= 6) {
-        alert('✅ Senha alterada com sucesso!');
-        addNotification('success', 'Senha alterada', 'Sua senha foi atualizada');
-    } else if (newPassword) {
-        alert('❌ A senha deve ter pelo menos 6 caracteres');
-    }
-}
-
-function deleteAccount() {
-    const confirm1 = confirm('⚠️ ATENÇÃO!\n\nEsta ação é IRREVERSÍVEL e apagará:\n• Todos seus dados\n• Histórico de leitura\n• Entradas do diário\n• Configurações\n\nDeseja realmente excluir sua conta?');
-    
-    if (confirm1) {
-        const confirm2 = confirm('Última confirmação: Tem certeza absoluta?');
-        if (confirm2) {
-            // Clear all data
-            localStorage.clear();
-            alert('Conta excluída. Você será redirecionado...');
-            window.location.href = '/';
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
         }
+        
+        const result = await response.json();
+        if (result.success) {
+            showNotification('✅ Campanha criada com sucesso!', 'success');
+            closeNovaCampanhaModal();
+            loadCampanhasData();
+        } else {
+            throw new Error(result.message || 'Erro ao criar campanha');
+        }
+    } catch (error) {
+        console.error('Erro ao criar campanha:', error);
+        showNotification('❌ Erro ao criar campanha: ' + error.message, 'error');
     }
 }
 
-// Expose notification function globally for E-Reader
-window.addNotification = addNotification;
+// Ver detalhes da campanha
+function verDetalhesCampanha(campanhaId) {
+    showNotification('👁️ Funcionalidade de detalhes em desenvolvimento', 'info');
+}
 
-// ============================================
-// CADASTRO COMPLETO MODAL
-// ============================================
+// Ver detalhes do alerta
+function verAlertaDetalhes(campanhaNome, tipoAlerta) {
+    showNotification(`📊 Detalhes do alerta para ${campanhaNome}: ${tipoAlerta}`, 'info');
+}
 
-function openCadastroCompletoModal() {
-    // Abrir a página de cadastro em uma nova aba
-    window.open('/cadastro.html', '_blank');
+// Carregar alertas detalhados
+async function loadAlertasCampanhasData() {
+    try {
+        const response = await fetch(`${API_BASE}/campanhas`);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            const alertas = [];
+            
+            data.campanhas.forEach(campanha => {
+                // Verificar CPA alto
+                if (campanha.cpa > campanha.cpaAlvo * 1.5) {
+                    alertas.push({
+                        tipo: 'cpa-alto',
+                        campanha: campanha.nome,
+                        mensagem: `CPA atual (R$ ${campanha.cpa.toFixed(2)}) está 50% acima do alvo (R$ ${campanha.cpaAlvo.toFixed(2)})`,
+                        severidade: 'alta',
+                        recomendacao: 'Considere pausar a campanha temporariamente ou ajustar lances e segmentação.'
+                    });
+                }
+                
+                // Verificar ROAS baixo
+                if (campanha.roas < campanha.roasAlvo * 0.7) {
+                    alertas.push({
+                        tipo: 'roas-baixo',
+                        campanha: campanha.nome,
+                        mensagem: `ROAS atual (${campanha.roas.toFixed(2)}) está 30% abaixo do alvo (${campanha.roasAlvo.toFixed(2)})`,
+                        severidade: 'alta',
+                        recomendacao: 'Reveja a segmentação, copy e landing page. Considere reduzir investimento.'
+                    });
+                }
+                
+                // Verificar orçamento restante baixo
+                const diasRestantes = Math.ceil((new Date(campanha.dataFim) - new Date()) / (1000 * 60 * 60 * 24));
+                if (diasRestantes <= 7 && campanha.orcamentoRestante < campanha.orcamento * 0.2) {
+                    alertas.push({
+                        tipo: 'orcamento-baixo',
+                        campanha: campanha.nome,
+                        mensagem: `Orçamento restante baixo com apenas ${diasRestantes} dias restantes`,
+                        severidade: 'media',
+                        recomendacao: 'Aumente o orçamento ou considere estender o período da campanha.'
+                    });
+                }
+            });
+            
+            renderizarAlertasDetalhes(alertas);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar alertas:', error);
+        showNotification('❌ Erro ao carregar alertas: ' + error.message, 'error');
+    }
+}
+
+// Renderizar alertas detalhados
+function renderizarAlertasDetalhes(alertas) {
+    const container = document.getElementById('alertas-detalhes');
+    
+    if (alertas.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span>✅</span>
+                <p>Nenhum alerta pendente</p>
+                <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 10px;">
+                    Todas as suas campanhas estão dentro dos parâmetros ideais.
+                </p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = alertas.map(alerta => `
+        <div class="alert-detail-card alert-${alerta.severidade}">
+            <div class="alert-detail-header">
+                <div class="alert-detail-icon">${getAlertIcon(alerta.tipo)}</div>
+                <div class="alert-detail-info">
+                    <h4>${alerta.campanha}</h4>
+                    <span class="alert-type">${getAlertTypeText(alerta.tipo)}</span>
+                </div>
+                <div class="alert-severity severity-${alerta.severidade}">
+                    ${alerta.severidade.toUpperCase()}
+                </div>
+            </div>
+            <div class="alert-detail-content">
+                <p class="alert-message">${alerta.mensagem}</p>
+                <div class="alert-recommendation">
+                    <strong>💡 Recomendação:</strong> ${alerta.recomendacao}
+                </div>
+            </div>
+            <div class="alert-detail-actions">
+                <button class="btn-secondary" onclick="ignorarAlerta('${alerta.campanha}', '${alerta.tipo}')">Ignorar</button>
+                <button class="btn-primary" onclick="otimizarCampanha('${alerta.campanha}', '${alerta.tipo}')">Otimizar</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Funções auxiliares para alertas detalhados
+function getAlertTypeText(tipo) {
+    const types = {
+        'cpa-alto': 'CPA Elevado',
+        'roas-baixo': 'ROAS Baixo',
+        'orcamento-baixo': 'Orçamento Baixo'
+    };
+    return types[tipo] || 'Alerta';
+}
+
+function ignorarAlerta(campanhaNome, tipoAlerta) {
+    showNotification(`✅ Alerta ignorado para ${campanhaNome}`, 'success');
+}
+
+function otimizarCampanha(campanhaNome, tipoAlerta) {
+    showNotification(`🔧 Abrindo painel de otimização para ${campanhaNome}...`, 'info');
+    // Implementar lógica de otimização específica
+}
+
+// Inicializar campanhas quando a seção for carregada
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar se estamos na seção de campanhas
+    const campanhasSection = document.getElementById('campanhas-section');
+    if (campanhasSection && campanhasSection.style.display !== 'none') {
+        loadCampanhasData();
+    }
+});
+
+// ==================== FUNÇÕES DE DETALHES DO CLIENTE ====================
+
+// Carregar lista de clientes para o seletor
+async function loadClientSelector() {
+    try {
+        const response = await fetch(`${API_BASE}/contacts/unified`);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            const select = document.getElementById('client-select');
+            select.innerHTML = '<option value="">Escolha um cliente...</option>';
+
+            data.contacts.forEach(contact => {
+                const option = document.createElement('option');
+                option.value = contact._id;
+                option.textContent = `${contact.nome} - ${contact.empresa || 'Sem empresa'}`;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar lista de clientes:', error);
+        showNotification('❌ Erro ao carregar lista de clientes: ' + error.message, 'error');
+    }
+}
+
+// Carregar detalhes do cliente selecionado
+async function loadClientDetails() {
+    const clientId = document.getElementById('client-select').value;
+    if (!clientId) {
+        document.getElementById('client-details-container').style.display = 'none';
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/contacts/unified`);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            const client = data.contacts.find(c => c._id === clientId);
+            if (client) {
+                displayClientDetails(client);
+                document.getElementById('client-details-container').style.display = 'grid';
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar detalhes do cliente:', error);
+        showNotification('❌ Erro ao carregar detalhes do cliente: ' + error.message, 'error');
+    }
+}
+
+// Exibir detalhes do cliente na interface
+function displayClientDetails(client) {
+    // Informações básicas
+    document.getElementById('client-nome').textContent = client.nome || '-';
+    document.getElementById('client-email').textContent = client.email || '-';
+    document.getElementById('client-telefone').textContent = client.telefone || '-';
+    document.getElementById('client-empresa').textContent = client.empresa || '-';
+
+    // Informações financeiras (carregar do banco se existir)
+    loadClientFinance(client._id);
+
+    // Contrato
+    loadClientContract(client._id);
+
+    // Histórico
+    loadClientHistory(client._id);
+}
+
+// Carregar informações financeiras do cliente
+async function loadClientFinance(clientId) {
+    try {
+        // Tentar carregar do banco de dados (se existir a collection)
+        const response = await fetch(`${API_BASE}/client-finance/${clientId}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.finance) {
+                document.getElementById('client-valor-pago').value = data.finance.valorPago || '';
+                document.getElementById('client-valor-investido').value = data.finance.valorInvestido || '';
+                calculateClientProfit();
+            }
+        }
+    } catch (error) {
+        console.log('Finance data not found, using defaults');
+        // Usar valores padrão vazios
+        document.getElementById('client-valor-pago').value = '';
+        document.getElementById('client-valor-investido').value = '';
+        calculateClientProfit();
+    }
+}
+
+// Calcular lucro e margem do cliente
+function calculateClientProfit() {
+    const valorPago = parseFloat(document.getElementById('client-valor-pago').value) || 0;
+    const valorInvestido = parseFloat(document.getElementById('client-valor-investido').value) || 0;
+
+    const lucro = valorPago - valorInvestido;
+    const margem = valorPago > 0 ? ((lucro / valorPago) * 100) : 0;
+
+    document.getElementById('client-lucro').textContent = `R$ ${lucro.toFixed(2)}`;
+    document.getElementById('client-lucro').className = `finance-result ${lucro >= 0 ? 'positive' : 'negative'}`;
+
+    document.getElementById('client-margem').textContent = `${margem.toFixed(1)}%`;
+    document.getElementById('client-margem').className = `finance-result ${margem >= 0 ? 'positive' : 'negative'}`;
+}
+
+// Atualizar informações financeiras do cliente
+async function updateClientFinance() {
+    calculateClientProfit();
+
+    const clientId = document.getElementById('client-select').value;
+    if (!clientId) return;
+
+    const financeData = {
+        clientId: clientId,
+        valorPago: parseFloat(document.getElementById('client-valor-pago').value) || 0,
+        valorInvestido: parseFloat(document.getElementById('client-valor-investido').value) || 0,
+        updatedAt: new Date()
+    };
+
+    try {
+        const response = await fetch(`${API_BASE}/client-finance`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(financeData)
+        });
+
+        if (response.ok) {
+            showNotification('✅ Informações financeiras atualizadas!', 'success');
+        } else {
+            throw new Error('Erro ao salvar');
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar finance:', error);
+        showNotification('❌ Erro ao atualizar informações financeiras', 'error');
+    }
+}
+
+// Carregar contrato do cliente
+async function loadClientContract(clientId) {
+    try {
+        const response = await fetch(`${API_BASE}/client-contract/${clientId}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.contract) {
+                document.getElementById('current-contract-name').textContent = data.contract.filename;
+                document.getElementById('download-contract').href = data.contract.url;
+                document.getElementById('download-contract').style.display = 'inline';
+            } else {
+                resetContractDisplay();
+            }
+        } else {
+            resetContractDisplay();
+        }
+    } catch (error) {
+        console.log('Contract not found');
+        resetContractDisplay();
+    }
+}
+
+function resetContractDisplay() {
+    document.getElementById('current-contract-name').textContent = 'Nenhum contrato enviado';
+    document.getElementById('download-contract').style.display = 'none';
+}
+
+// Upload de contrato
+async function uploadContract() {
+    const fileInput = document.getElementById('contract-upload');
+    const file = fileInput.files[0];
+    const clientId = document.getElementById('client-select').value;
+
+    if (!file || !clientId) {
+        showNotification('❌ Selecione um arquivo e um cliente', 'error');
+        return;
+    }
+
+    if (file.type !== 'application/pdf') {
+        showNotification('❌ Apenas arquivos PDF são permitidos', 'error');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('contract', file);
+    formData.append('clientId', clientId);
+
+    try {
+        const response = await fetch(`${API_BASE}/client-contract/upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            showNotification('✅ Contrato enviado com sucesso!', 'success');
+            loadClientContract(clientId);
+            fileInput.value = ''; // Limpar input
+        } else {
+            throw new Error('Erro no upload');
+        }
+    } catch (error) {
+        console.error('Erro no upload:', error);
+        showNotification('❌ Erro ao enviar contrato', 'error');
+    }
+}
+
+// Carregar histórico do cliente
+async function loadClientHistory(clientId) {
+    try {
+        const response = await fetch(`${API_BASE}/client-history/${clientId}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.history) {
+                displayClientHistory(data.history);
+            } else {
+                displayEmptyHistory();
+            }
+        } else {
+            displayEmptyHistory();
+        }
+    } catch (error) {
+        console.log('History not found');
+        displayEmptyHistory();
+    }
+}
+
+function displayClientHistory(history) {
+    const container = document.getElementById('client-history');
+    container.innerHTML = history.map(item => `
+        <div class="history-item">
+            <div class="history-date">${new Date(item.date).toLocaleDateString('pt-BR')}</div>
+            <div class="history-action">${item.action}</div>
+            <div class="history-details">${item.details}</div>
+        </div>
+    `).join('');
+}
+
+function displayEmptyHistory() {
+    const container = document.getElementById('client-history');
+    container.innerHTML = `
+        <div class="empty-state">
+            <span>📋</span>
+            <p>Nenhum histórico disponível</p>
+        </div>
+    `;
+}
+
+// ==================== FUNÇÕES DE GESTORES ====================
+
+// Carregar dados dos gestores
+async function loadGestoresData() {
+    try {
+        const response = await fetch(`${API_BASE}/gestores`);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+            atualizarEstatisticasGestores(data.gestores);
+            renderizarGestores(data.gestores);
+        }
+    } catch (error) {
+        console.error('Erro ao carregar gestores:', error);
+        showNotification('❌ Erro ao carregar gestores: ' + error.message, 'error');
+    }
+}
+
+// Atualizar estatísticas dos gestores
+function atualizarEstatisticasGestores(gestores) {
+    const totalGestores = gestores.filter(g => g.tipo === 'autonomo').length;
+    const totalAgencias = gestores.filter(g => g.tipo === 'agencia').length;
+    const receitaTotal = gestores.reduce((sum, g) => sum + (g.valorMensal || 0), 0);
+    const margemMedia = gestores.length > 0 ? 
+        gestores.reduce((sum, g) => sum + (g.comissao || 0), 0) / gestores.length : 0;
+
+    document.getElementById('total-gestores').textContent = totalGestores;
+    document.getElementById('total-agencias').textContent = totalAgencias;
+    document.getElementById('receita-total').textContent = `R$ ${receitaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('margem-media').textContent = `${margemMedia.toFixed(1)}%`;
+}
+
+// Renderizar lista de gestores
+function renderizarGestores(gestores) {
+    const container = document.getElementById('gestores-list');
+    
+    if (gestores.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span>👥</span>
+                <p>Nenhum gestor configurado</p>
+                <button class="btn-secondary" onclick="openNovoGestorModal()">Configurar Primeiro Gestor</button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = gestores.map(gestor => `
+        <div class="gestor-card" onclick="editarGestor('${gestor._id}')">
+            <div class="gestor-header">
+                <h4>${gestor.nome}</h4>
+                <span class="gestor-type ${gestor.tipo}">${getTipoGestorText(gestor.tipo)}</span>
+            </div>
+            <div class="gestor-info">
+                <div class="info-item">
+                    <span class="label">Email:</span>
+                    <span class="value">${gestor.email}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Valor Mensal:</span>
+                    <span class="value">R$ ${gestor.valorMensal?.toLocaleString('pt-BR', {minimumFractionDigits: 2}) || '0,00'}</span>
+                </div>
+                ${gestor.tipo === 'agencia' ? `
+                    <div class="info-item">
+                        <span class="label">Setup:</span>
+                        <span class="value">R$ ${gestor.valorSetup?.toLocaleString('pt-BR', {minimumFractionDigits: 2}) || '0,00'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Comissão:</span>
+                        <span class="value">${gestor.comissao || 0}%</span>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="gestor-status">
+                <span class="status-${gestor.status === 'ativo' ? 'success' : 'secondary'}">${getStatusGestorText(gestor.status)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Funções auxiliares para gestores
+function getTipoGestorText(tipo) {
+    return tipo === 'autonomo' ? 'Autônomo' : 'Agência';
+}
+
+function getStatusGestorText(status) {
+    return status === 'ativo' ? 'Ativo' : 'Inativo';
+}
+
+// Funções dos modais de gestores
+function openNovoGestorModal(gestorId = null) {
+    const modal = document.getElementById('novo-gestor-modal');
+    const form = document.getElementById('novo-gestor-form');
+    
+    if (gestorId) {
+        // Modo edição
+        document.querySelector('#novo-gestor-modal .modal-header h3').textContent = '✏️ Editar Gestor';
+        // Carregar dados do gestor para edição
+        loadGestorForEdit(gestorId);
+    } else {
+        // Modo criação
+        document.querySelector('#novo-gestor-modal .modal-header h3').textContent = '➕ Configurar Gestor';
+        form.reset();
+        toggleAgenciaFields();
+    }
+    
+    modal.style.display = 'block';
+}
+
+function closeNovoGestorModal() {
+    document.getElementById('novo-gestor-modal').style.display = 'none';
+    document.getElementById('novo-gestor-form').reset();
+}
+
+function toggleAgenciaFields() {
+    const tipo = document.getElementById('gestor-tipo').value;
+    const agenciaFields = document.querySelectorAll('.agencia-only');
+    
+    agenciaFields.forEach(field => {
+        field.style.display = tipo === 'agencia' ? 'block' : 'none';
+    });
+}
+
+// Salvar gestor
+async function salvarGestor() {
+    const form = document.getElementById('novo-gestor-form');
+    const formData = new FormData(form);
+    
+    const gestor = {
+        nome: formData.get('gestor-nome'),
+        email: formData.get('gestor-email'),
+        tipo: formData.get('gestor-tipo'),
+        valorMensal: parseFloat(formData.get('gestor-valor-mensal')),
+        status: formData.get('gestor-status')
+    };
+    
+    if (gestor.tipo === 'agencia') {
+        gestor.valorSetup = parseFloat(formData.get('gestor-valor-setup')) || 0;
+        gestor.comissao = parseFloat(formData.get('gestor-comissao')) || 0;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/gestores`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gestor)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+            showNotification('✅ Gestor salvo com sucesso!', 'success');
+            closeNovoGestorModal();
+            loadGestoresData();
+        } else {
+            throw new Error(result.message || 'Erro ao salvar gestor');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar gestor:', error);
+        showNotification('❌ Erro ao salvar gestor: ' + error.message, 'error');
+    }
+}
+
+// Editar gestor
+function editarGestor(gestorId) {
+    openNovoGestorModal(gestorId);
+}
+
+// Carregar gestor para edição
+async function loadGestorForEdit(gestorId) {
+    try {
+        const response = await fetch(`${API_BASE}/gestores/${gestorId}`);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success && data.gestor) {
+            const g = data.gestor;
+            document.getElementById('gestor-nome').value = g.nome || '';
+            document.getElementById('gestor-email').value = g.email || '';
+            document.getElementById('gestor-tipo').value = g.tipo || 'autonomo';
+            document.getElementById('gestor-valor-mensal').value = g.valorMensal || '';
+            document.getElementById('gestor-status').value = g.status || 'ativo';
+            
+            if (g.tipo === 'agencia') {
+                document.getElementById('gestor-valor-setup').value = g.valorSetup || '';
+                document.getElementById('gestor-comissao').value = g.comissao || '';
+            }
+            
+            toggleAgenciaFields();
+        }
+    } catch (error) {
+        console.error('Erro ao carregar gestor:', error);
+        showNotification('❌ Erro ao carregar gestor para edição', 'error');
+    }
+}
+
+// ==================== DESIGN & COPY ====================
+
+// Upload de materiais de design
+async function uploadDesignMaterials(files) {
+    const formData = new FormData();
+    const campaignId = document.getElementById('campaign-filter').value || 'general';
+    
+    for (let file of files) {
+        formData.append('files', file);
+    }
+    formData.append('campaignId', campaignId);
+    formData.append('type', 'design');
+    
+    try {
+        const response = await fetch(`${API_BASE}/design-materials`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            showNotification('✅ Materiais enviados com sucesso!', 'success');
+            loadMaterialsLibrary();
+            loadActiveCampaignsDesign();
+        } else {
+            showNotification('❌ Erro ao enviar materiais', 'error');
+        }
+    } catch (error) {
+        console.error('Erro no upload:', error);
+        showNotification('❌ Erro ao enviar materiais', 'error');
+    }
+}
+
+// Carregar biblioteca de materiais
+async function loadMaterialsLibrary() {
+    try {
+        const response = await fetch(`${API_BASE}/design-materials`);
+        const data = await response.json();
+        
+        if (data.success && data.materials.length > 0) {
+            displayMaterials(data.materials);
+        } else {
+            document.getElementById('materials-library').innerHTML = `
+                <div class="empty-state">
+                    <span>📁</span>
+                    <p>Nenhum material disponível</p>
+                    <p>Os designers ainda não enviaram materiais</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar materiais:', error);
+    }
+}
+
+// Exibir materiais na biblioteca
+function displayMaterials(materials) {
+    const container = document.getElementById('materials-library');
+    
+    const materialsHtml = materials.map(material => `
+        <div class="material-card">
+            <div class="material-header">
+                <h4>${material.filename}</h4>
+                <span class="material-date">${new Date(material.uploadDate).toLocaleDateString('pt-BR')}</span>
+            </div>
+            <div class="material-meta">
+                <span class="campaign-tag">${material.campaignId}</span>
+                <span class="file-type">${material.fileType}</span>
+            </div>
+            <div class="material-actions">
+                <button class="btn-secondary" onclick="downloadMaterial('${material._id}')">📥 Baixar</button>
+                <button class="btn-secondary" onclick="shareMaterial('${material._id}')">🔗 Compartilhar</button>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = materialsHtml;
+}
+
+// Filtrar materiais por campanha
+function filterMaterials() {
+    const campaignId = document.getElementById('campaign-filter').value;
+    loadMaterialsLibrary(); // Recarregar com filtro
+}
+
+// Baixar material
+async function downloadMaterial(materialId) {
+    try {
+        const response = await fetch(`${API_BASE}/design-materials/${materialId}/download`);
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'material_design';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    } catch (error) {
+        console.error('Erro ao baixar material:', error);
+        showNotification('❌ Erro ao baixar material', 'error');
+    }
+}
+
+// Compartilhar material
+function shareMaterial(materialId) {
+    const shareUrl = `${window.location.origin}/api/design-materials/${materialId}/share`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+        showNotification('🔗 Link copiado para área de transferência!', 'success');
+    });
+}
+
+// Carregar campanhas ativas para design
+async function loadActiveCampaignsDesign() {
+    try {
+        const response = await fetch(`${API_BASE}/campaigns/active`);
+        const data = await response.json();
+        
+        if (data.success && data.campaigns.length > 0) {
+            displayActiveCampaignsDesign(data.campaigns);
+        } else {
+            document.getElementById('active-campaigns-design').innerHTML = `
+                <div class="empty-state">
+                    <span>📈</span>
+                    <p>Nenhuma campanha ativa</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar campanhas ativas:', error);
+    }
+}
+
+// Exibir campanhas ativas
+function displayActiveCampaignsDesign(campaigns) {
+    const container = document.getElementById('active-campaigns-design');
+    
+    const campaignsHtml = campaigns.map(campaign => `
+        <div class="campaign-card-design">
+            <div class="campaign-header">
+                <h4>${campaign.name}</h4>
+                <span class="campaign-status status-${campaign.status}">${campaign.status}</span>
+            </div>
+            <div class="campaign-meta">
+                <span>Cliente: ${campaign.client}</span>
+                <span>Deadline: ${new Date(campaign.deadline).toLocaleDateString('pt-BR')}</span>
+            </div>
+            <div class="campaign-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${campaign.progress}%"></div>
+                </div>
+                <span>${campaign.progress}% concluído</span>
+            </div>
+            <div class="campaign-actions">
+                <button class="btn-secondary" onclick="viewCampaignMaterials('${campaign._id}')">📁 Ver Materiais</button>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = campaignsHtml;
+}
+
+// Ver materiais de uma campanha específica
+function viewCampaignMaterials(campaignId) {
+    document.getElementById('campaign-filter').value = campaignId;
+    filterMaterials();
+    showNotification('📁 Filtrando materiais da campanha selecionada', 'info');
+}
+
+// Inicializar eventos de upload
+function initializeDesignUpload() {
+    const uploadArea = document.getElementById('design-upload-area');
+    const fileInput = document.getElementById('design-files');
+    
+    if (uploadArea && fileInput) {
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = Array.from(e.dataTransfer.files);
+            uploadDesignMaterials(files);
+        });
+        
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            uploadDesignMaterials(files);
+        });
+    }
+}
+
+// Carregar campanhas para filtro
+async function loadCampaignsForFilter() {
+    try {
+        const response = await fetch(`${API_BASE}/campaigns`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const select = document.getElementById('campaign-filter');
+            select.innerHTML = '<option value="">Todas as campanhas</option>';
+            
+            data.campaigns.forEach(campaign => {
+                select.innerHTML += `<option value="${campaign._id}">${campaign.name}</option>`;
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar campanhas para filtro:', error);
+    }
+}
+
+// Inicializar seção de design e copy
+function initializeDesignCopySection() {
+    loadMaterialsLibrary();
+    loadActiveCampaignsDesign();
+    loadCampaignsForFilter();
+    initializeDesignUpload();
 }

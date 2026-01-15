@@ -5,12 +5,10 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: npm install
-    startCommand: node server.js
+    buildCommand: yarn install && yarn build && node copy-js-files.mjs
+    startCommand: node dist/server.js
     envVars:
       - key: NODE_VERSION
         value: 22.22.0
       - key: NODE_ENV
         value: production
-      - key: RENDER
-        value: true

@@ -5,7 +5,9 @@
 class AuthManager {
     static TOKEN_KEY = 'avila_dashboard_token';
     static USER_KEY = 'avila_dashboard_user';
-    static API_BASE = 'http://localhost:3000/api';
+    static API_BASE = window.ENV?.API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000/api'
+        : 'https://manager-api.onrender.com/api');
 
     /**
      * Realiza login e armazena token
@@ -69,10 +71,84 @@ class AuthManager {
     /**
      * Verifica autenticação ao carregar página
      */
-    static checkAuth() {
-        if (!this.isAuthenticated() && !window.location.pathname.includes('login.html')) {
+    static async checkAuth() {
+        // Páginas públicas que não precisam de autenticação
+        const publicPages = ['login.html', 'index.html', 'cadastro.html'];
+        const isPublicPage = publicPages.some(page => window.location.pathname.includes(page));
+        
+        if (isPublicPage) return true;
+
+        const token = this.getToken();
+        if (!token) {
             this.logout();
+            return false;
         }
+
+        // Validar token com backend
+        try {
+            const response = await fetch(`${this.API_BASE}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!data.success || !data.user) {
+                this.logout();
+                return false;
+            }
+
+            // Atualizar dados do usuário
+            localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
+            return true;
+
+        } catch (error) {
+            console.error('Erro ao validar token:', error);
+            // Em caso de erro de rede, mantém usuário logado
+            return true;
+        }
+    }
+
+    /**
+     * Configura renovação automática de token
+     */
+    static setupTokenRefresh() {
+        // Renovar token a cada 30 minutos
+        setInterval(async () => {
+            const token = this.getToken();
+            if (token) {
+                try {
+                    const response = await fetch(`${this.API_BASE}/auth/refresh`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success && data.token) {
+                        localStorage.setItem(this.TOKEN_KEY, data.token);
+                    }
+                } catch (error) {
+                    console.warn('Falha ao renovar token:', error);
+                }
+            }
+        }, 30 * 60 * 1000); // 30 minutos
+    }
+
+    /**
+     * Sincroniza logout entre múltiplas tabs
+     */
+    static setupMultiTabSync() {
+        window.addEventListener('storage', (e) => {
+            if (e.key === this.TOKEN_KEY && !e.newValue) {
+                // Token foi removido em outra tab
+                window.location.href = '/index.html';
+            }
+        });
     }
 }
 
@@ -80,7 +156,9 @@ class AuthManager {
  * Cliente API com autenticação automática
  */
 class APIClient {
-    static BASE_URL = 'http://localhost:3000/api';
+    static BASE_URL = window.ENV?.API_BASE || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000/api'
+        : 'https://manager-api.onrender.com/api');
 
     /**
      * Faz requisição autenticada
@@ -290,6 +368,15 @@ class UIUtils {
 }
 
 // Verifica autenticação ao carregar
-document.addEventListener('DOMContentLoaded', () => {
-    AuthManager.checkAuth();
+document.addEventListener('DOMContentLoaded', async () => {
+    await AuthManager.checkAuth();
+    AuthManager.setupTokenRefresh();
+    AuthManager.setupMultiTabSync();
 });
+
+// Função global de logout
+window.logout = function() {
+    if (confirm('Deseja realmente sair?')) {
+        AuthManager.logout();
+    }
+};
