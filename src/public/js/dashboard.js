@@ -3,6 +3,17 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
     ? 'http://localhost:3000/api'
     : 'https://manager-api.railway.app/api'; // Altere para sua URL de backend em produção
 
+// Configuração mockada para frontend (quando backend não disponível)
+const CONFIG = {
+    cargo: {
+        token: 'Configure seu token no backend'
+    },
+    gmail: [],
+    gcloud: {
+        clientId: 'Configure no backend'
+    }
+};
+
 // Toggle Sidebar (Desabilitado - Menu horizontal)
 function toggleSidebar() {
     // Sidebar removido - usando menu horizontal
@@ -2524,6 +2535,11 @@ async function loadCRMData() {
     
     try {
         const response = await fetch(`${API_BASE}/crm/leads`);
+        
+        if (!response.ok) {
+            throw new Error(`Backend não disponível (${response.status})`);
+        }
+        
         const data = await response.json();
         
         if (!data.success) throw new Error(data.error);
@@ -2707,8 +2723,19 @@ async function loadCRMData() {
     } catch (error) {
         console.error('CRM error:', error);
         container.innerHTML = `
-            <div class="service-card" style="background: #fee2e2; border-left: 4px solid #ef4444;">
-                <p style="color: #991b1b;">❌ Erro ao carregar CRM: ${error.message}</p>
+            <div class="service-card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+                <h3 style="color: #92400e; margin-bottom: 15px;">⚠️ Backend Não Disponível</h3>
+                <p style="color: #78350f; margin-bottom: 10px;">
+                    O CRM requer conexão com o backend. Configure o backend no Railway ou servidor de sua escolha.
+                </p>
+                <p style="color: #78350f; font-size: 0.9em;">
+                    <strong>Erro:</strong> ${error.message}
+                </p>
+                <div style="margin-top: 15px; padding: 10px; background: white; border-radius: 6px;">
+                    <p style="color: #64748b; font-size: 0.85em;">
+                        💡 <strong>Dica:</strong> Altere <code>API_BASE</code> em dashboard.js para apontar para seu backend em produção.
+                    </p>
+                </div>
             </div>
         `;
     }
