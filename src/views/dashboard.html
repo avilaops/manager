@@ -8,23 +8,24 @@
     <meta name="theme-color" content="#3b82f6">
     <meta name="description" content="Dashboard unificado para gerenciamento de projetos, CRM, GitHub, LinkedIn, e-mail, MongoDB, cloud services e automação. Plataforma completa de produtividade empresarial e desenvolvimento.">
     <title>Avila Dashboard - Gerenciamento Unificado</title>
+    
+    <!-- Preconnect para domínios externos -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="preconnect" href="https://www.gravatar.com" crossorigin>
+    <link rel="dns-prefetch" href="https://manager-api.railway.app">
+    
+    <!-- Preload CSS crítico -->
+    <link rel="preload" href="/css/dashboard.css" as="style">
+    
     <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/notifications-settings.css">
+    <link rel="stylesheet" href="/css/notifications-settings.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/css/notifications-settings.css"></noscript>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Avx" />
     <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-XXXXXXXXXX');
-    </script>
 </head>
 <body>
     <!-- Top Navigation Bar -->
@@ -1289,9 +1290,10 @@ Não há limites, escreva livremente..."></textarea>
         </div>
     </main>
 
-    <link rel="stylesheet" href="/css/ereader.css">
-    <script src="/js/ereader.js?v=3"></script>
-    <script src="/js/dashboard.js?v=3"></script>
+    <link rel="stylesheet" href="/css/ereader.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/css/ereader.css"></noscript>
+    <script defer src="/js/ereader.js?v=4"></script>
+    <script defer src="/js/dashboard.js?v=4"></script>
     <script>
         // Registrar Service Worker
         if ('serviceWorker' in navigator) {
@@ -1328,6 +1330,31 @@ Não há limites, escreva livremente..."></textarea>
         // Inicializar E-Reader ao carregar a página
         document.addEventListener('DOMContentLoaded', function() {
             ereaderSystem = new EReaderSystem();
+        });
+        
+        // Lazy load Google Analytics após interação do usuário
+        let gaLoaded = false;
+        function loadGoogleAnalytics() {
+            if (gaLoaded) return;
+            gaLoaded = true;
+            
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
+            document.head.appendChild(script);
+            
+            script.onload = function() {
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-XXXXXXXXXX');
+            };
+        }
+        
+        // Carregar GA após 3s ou na primeira interação
+        setTimeout(loadGoogleAnalytics, 3000);
+        ['scroll', 'click', 'mousemove', 'keydown'].forEach(event => {
+            window.addEventListener(event, loadGoogleAnalytics, { once: true, passive: true });
         });
     </script>
 </body>

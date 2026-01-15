@@ -5,6 +5,9 @@
 .env.local
 .env.*.local
 *.env
+server.js
+server_clean.js
+server.refactored.js
 
 # ==========================================
 # Node.js
