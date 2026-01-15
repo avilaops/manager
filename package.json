@@ -1,7 +1,7 @@
 {
   "name": "avila-dashboard-backend",
-  "version": "2.0.0",
-  "description": "Backend para Avila Dashboard - Integração com todos os serviços",
+  "version": "2.1.0",
+  "description": "Backend para Avila Dashboard - Integração com todos os serviços (Estrutura Reorganizada)",
   "type": "module",
   "main": "dist/server.js",
   "engines": {

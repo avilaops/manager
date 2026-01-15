@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="public, max-age=31536000">
+    <meta http-equiv="expires" content="31536000">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="Dashboard unificado para gerenciamento de projetos, CRM, GitHub, LinkedIn, e-mail, MongoDB, cloud services e automação. Plataforma completa de produtividade empresarial e desenvolvimento.">
+    <title>Avila Dashboard - Gerenciamento Unificado</title>
+    
+    <!-- Preconnect para domínios externos -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="preconnect" href="https://www.gravatar.com" crossorigin>
+    <link rel="dns-prefetch" href="https://manager-api.onrender.com">
+    
+    <!-- Preload CSS crítico -->
+    <link rel="preload" href="/css/dashboard.css" as="style">
+    
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/notifications-settings.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/css/notifications-settings.css"></noscript>
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Avx" />
+    <link rel="manifest" href="/manifest.json" />
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="navbar-brand" onclick="showSection('dashboard')" style="cursor: pointer;">
+            <span class="brand-logo">🚀</span>
+            <h1>Avila Dashboard</h1>
+        </div>
+        
+        <div class="navbar-menu">
+            <div class="menu-item" onclick="showSection('dashboard')">
+                <span class="icon">🏠</span>
+                <span>Dashboard</span>
+            </div>
+            
+            <div class="menu-item dropdown">
+                <span class="icon">💻</span>
+                <span>Developer Tools</span>
+                <div class="dropdown-content">
+                    <a href="#" onclick="event.preventDefault(); showSection('cargo');">📦 Cargo Registry</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('github');">🐙 GitHub</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('azure');">☁️ Azure DevOps</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('sentry');">🐛 Sentry</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('railway');">🚂 Railway</a>
+                </div>
+            </div>
+            
+            <div class="menu-item dropdown">
+                <span class="icon">☁️</span>
+                <span>Cloud & DB</span>
+                <div class="dropdown-content">
+                    <a href="#" onclick="event.preventDefault(); showSection('mongodb');">🍃 MongoDB Atlas</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('gcloud');">🌐 Google Cloud</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('dns');">🌍 DNS Management</a>
+                </div>
+            </div>
+            
+            <div class="menu-item dropdown">
+                <span class="icon">🌐</span>
+                <span>Social & Business</span>
+                <div class="dropdown-content">
+                    <a href="#" onclick="event.preventDefault(); showSection('linkedin');">💼 LinkedIn</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('meta');">📱 Meta Business</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('social-post');">📤 Postar em Todas</a>
+                </div>
+            </div>
+            
+            <div class="menu-item" onclick="showSection('calendario')">
+                <span class="icon">📅</span>
+                <span>Calendário</span>
+            </div>
+            
+            <div class="menu-item" onclick="showSection('crm')">
+                <span class="icon">🤝</span>
+                <span>CRM & Leads</span>
+            </div>
+            
+            <div class="menu-item" onclick="showSection('financeiro')">
+                <span class="icon">💰</span>
+                <span>Financeiro</span>
+            </div>
+            
+            <div class="menu-item dropdown">
+                <span class="icon">💳</span>
+                <span>Payments</span>
+                <div class="dropdown-content">
+                    <a href="#" onclick="event.preventDefault(); showSection('payments');">💰 PayPal & Stripe</a>
+                </div>
+            </div>
+            
+            <div class="menu-item" onclick="showSection('biblioteca')">
+                <span class="icon">📚</span>
+                <span>Biblioteca & Leitura</span>
+            </div>
+            
+            <div class="menu-item" onclick="showSection('diario')">
+                <span class="icon">📔</span>
+                <span>Diário Pessoal</span>
+            </div>
+            
+            <div class="menu-item dropdown">
+                <span class="icon">📧</span>
+                <span>Mais</span>
+                <div class="dropdown-content">
+                    <a href="#" onclick="event.preventDefault(); showSection('gmail');">📬 Gmail</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('gravatar');">👤 Gravatar</a>
+                    <a href="#" onclick="event.preventDefault(); showSection('ai');">🧠 AI & ML Tools</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="navbar-actions">
+            <span class="navbar-time" id="current-time"></span>
+            <button class="btn-icon" title="Notificações" onclick="toggleNotifications()">
+                <span>🔔</span>
+                <span class="notification-badge" id="notificationBadge">0</span>
+            </button>
+            <button class="btn-icon" title="Configurações" onclick="openSettings()">
+                <span>⚙️</span>
+            </button>
+            <div class="user-profile" onclick="toggleProfileMenu()">
+                <span class="user-icon" role="img" aria-label="Ícone de perfil do usuário">👤</span>
+                <span class="user-name">Nicolas Rosa</span>
+                <span class="dropdown-arrow">▼</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notifications Dropdown -->
+    <div class="notifications-dropdown" id="notificationsDropdown">
+        <div class="notifications-header">
+            <h3>🔔 Notificações</h3>
+            <button class="btn-text" onclick="clearAllNotifications()">Limpar tudo</button>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+            <div class="notification-item">
+                <span class="notification-icon">ℹ️</span>
+                <div class="notification-content">
+                    <p class="notification-title">Bem-vindo ao Gerenciador Pessoal!</p>
+                    <p class="notification-time">Agora</p>
+                </div>
+            </div>
+        </div>
+        <div class="notifications-footer">
+            <button class="btn-text" onclick="viewAllNotifications()">Ver todas</button>
+        </div>
+    </div>
+
+    <!-- Profile Dropdown Menu -->
+    <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-header">
+            <div class="profile-avatar">👤</div>
+            <div class="profile-info">
+                <h3 id="profileName">Nicolas Rosa</h3>
+                <p id="profileEmail">nicolas@avila.com</p>
+            </div>
+        </div>
+        <div class="profile-menu">
+            <a href="#" class="profile-menu-item" onclick="event.preventDefault(); editProfile();">
+                <span>👤</span> Meu Perfil
+            </a>
+            <a href="#" class="profile-menu-item" onclick="event.preventDefault(); openSettings();">
+                <span>⚙️</span> Configurações
+            </a>
+            <a href="#" class="profile-menu-item" onclick="event.preventDefault(); viewStatistics();">
+                <span>📊</span> Minhas Estatísticas
+            </a>
+            <a href="#" class="profile-menu-item" onclick="event.preventDefault(); openHelp();">
+                <span>❓</span> Ajuda
+            </a>
+            <hr style="margin: 10px 0; border: none; border-top: 1px solid #eee;">
+            <a href="#" class="profile-menu-item logout" onclick="event.preventDefault(); logout();">
+                <span>🚪</span> Sair
+            </a>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content settings-modal">
+            <div class="modal-header">
+                <h2>⚙️ Configurações</h2>
+                <button class="modal-close" onclick="closeSettings()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="settings-tab active" onclick="switchSettingsTab('geral')">Geral</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('aparencia')">Aparência</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('notificacoes')">Notificações</button>
+                    <button class="settings-tab" onclick="switchSettingsTab('conta')">Conta</button>
+                </div>
+                
+                <div class="settings-content">
+                    <!-- Tab: Geral -->
+                    <div class="settings-tab-content active" id="tab-geral">
+                        <h3>Configurações Gerais</h3>
+                        <div class="setting-item">
+                            <label>Idioma</label>
+                            <select id="settingLanguage">
+                                <option value="pt-BR" selected>Português (BR)</option>
+                                <option value="en-US">English (US)</option>
+                                <option value="es-ES">Español</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Meta diária de leitura</label>
+                            <input type="number" id="settingReadingGoal" value="10" min="1" max="100">
+                            <span class="setting-hint">páginas por dia</span>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="settingAutoSave" checked>
+                                Auto-salvar progresso
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="settingAutoBackup" checked>
+                                Backup automático (diário)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab: Aparência -->
+                    <div class="settings-tab-content" id="tab-aparencia">
+                        <h3>Aparência</h3>
+                        <div class="setting-item">
+                            <label>Tema</label>
+                            <select id="settingTheme">
+                                <option value="light" selected>Claro</option>
+                                <option value="dark">Escuro</option>
+                                <option value="auto">Automático</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Tamanho da fonte</label>
+                            <select id="settingFontSize">
+                                <option value="small">Pequena</option>
+                                <option value="medium" selected>Média</option>
+                                <option value="large">Grande</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="settingAnimations" checked>
+                                Ativar animações
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab: Notificações -->
+                    <div class="settings-tab-content" id="tab-notificacoes">
+                        <h3>Notificações</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="settingNotifyMeta" checked>
+                                Meta de leitura cumprida
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="settingNotifyEmail" checked>
+                                Novos emails sincronizados
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="settingNotifyBackup" checked>
+                                Backup realizado com sucesso
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="settingNotifyReminders" checked>
+                                Lembretes do calendário
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab: Conta -->
+                    <div class="settings-tab-content" id="tab-conta">
+                        <h3>Informações da Conta</h3>
+                        <div class="setting-item">
+                            <label>Nome completo</label>
+                            <input type="text" id="settingName" value="Nicolas Rosa">
+                        </div>
+                        <div class="setting-item">
+                            <label>Email</label>
+                            <input type="email" id="settingEmail" value="nicolas@avila.com">
+                        </div>
+                        <div class="setting-item">
+                            <label>Telefone</label>
+                            <input type="tel" id="settingPhone" value="">
+                        </div>
+                        <hr style="margin: 20px 0;">
+                        <div class="setting-item">
+                            <button class="btn-danger" onclick="changePassword()">🔒 Alterar Senha</button>
+                        </div>
+                        <div class="setting-item">
+                            <button class="btn-danger" onclick="deleteAccount()">❌ Excluir Conta</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeSettings()">Cancelar</button>
+                <button class="btn-primary" onclick="saveSettings()">💾 Salvar Configurações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar (Hidden) (Hidden) -->
+    <div class="sidebar" style="display: none;">
+        <div class="logo">
+            <h2>🚀 Avila Dashboard</h2>
+            <p class="subtitle">Gerenciamento Unificado</p>
+        </div>
+        
+        <nav class="nav-menu">
+            <div class="nav-section">
+                <h3>📊 Principal</h3>
+                <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">
+                    <span class="icon">🏠</span> Dashboard
+                </a>                <a href="#calendario" class="nav-item" onclick="showSection('calendario')">
+                    <span class="icon">📅</span> Calendário
+                </a>            </div>
+
+            <div class="nav-section">
+                <h3>💻 Developer Tools</h3>
+                <a href="#cargo" class="nav-item" onclick="showSection('cargo')">
+                    <span class="icon">📦</span> Cargo Registry
+                </a>
+                <a href="#github" class="nav-item" onclick="showSection('github')">
+                    <span class="icon">🐙</span> GitHub
+                </a>
+                <a href="#azure" class="nav-item" onclick="showSection('azure')">
+                    <span class="icon">☁️</span> Azure DevOps
+                </a>
+                <a href="#sentry" class="nav-item" onclick="showSection('sentry')">
+                    <span class="icon">🐛</span> Sentry
+                </a>
+                <a href="#railway" class="nav-item" onclick="showSection('railway')">
+                    <span class="icon">🚂</span> Railway
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>🌐 Social & Professional</h3>
+                <a href="#linkedin" class="nav-item" onclick="showSection('linkedin')">
+                    <span class="icon">💼</span> LinkedIn
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>🗄️ Database</h3>
+                <a href="#mongodb" class="nav-item" onclick="showSection('mongodb')">
+                    <span class="icon">🍃</span> MongoDB Atlas
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>☁️ Cloud Services</h3>
+                <a href="#gcloud" class="nav-item" onclick="showSection('gcloud')">
+                    <span class="icon">🌐</span> Google Cloud
+                </a>
+                <a href="#dns" class="nav-item" onclick="showSection('dns')">
+                    <span class="icon">🌍</span> DNS Management
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>📧 Email & Communication</h3>
+                <a href="#gmail" class="nav-item" onclick="showSection('gmail')">
+                    <span class="icon">📬</span> Gmail (3 contas)
+                </a>
+                <a href="#gravatar" class="nav-item" onclick="showSection('gravatar')">
+                    <span class="icon">👤</span> Gravatar
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>💳 Payments</h3>
+                <a href="#payments" class="nav-item" onclick="showSection('payments')">
+                    <span class="icon">💰</span> PayPal & Stripe
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>🤖 AI Services</h3>
+                <a href="#ai" class="nav-item" onclick="showSection('ai')">
+                    <span class="icon">🧠</span> AI & ML Tools
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <h3>🔍 Diagnóstico</h3>
+                <a href="#lightroom" class="nav-item" onclick="showSection('lightroom')">
+                    <span class="icon">🔬</span> Lightroom Inspector
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <p>© 2026 Avila Inc</p>
+            <a href="https://avila.inc" target="_blank" rel="noopener noreferrer">avila.inc</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content" role="main">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 id="page-title">Dashboard Principal</h1>
+                <p id="page-subtitle">Visão geral de todos os serviços</p>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle" onclick="toggleTheme()" style="background: none; border: none; font-size: 1.5em; cursor: pointer; margin-right: 20px; padding: 8px;" title="Alternar tema">
+                    🌙
+                </button>
+                <div class="user-info">
+                    <img src="https://www.gravatar.com/avatar/6711" alt="Avatar" class="avatar" loading="lazy">
+                    <div>
+                        <p class="user-name">Nicolas Rosa</p>
+                        <p class="user-role">Administrator</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Sections -->
+        <div class="content">
+            <!-- Dashboard Section -->
+            <section id="section-dashboard" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-content">
+                            <h2>Cargo Packages</h2>
+                            <p class="stat-value" id="cargo-count">---</p>
+                            <p class="stat-label">Pacotes publicados</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🐙</div>
+                        <div class="stat-content">
+                            <h2>GitHub Repos</h2>
+                            <p class="stat-value" id="github-count">---</p>
+                            <p class="stat-label">Repositórios</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">📧</div>
+                        <div class="stat-content">
+                            <h2>Emails</h2>
+                            <p class="stat-value">3</p>
+                            <p class="stat-label">Contas Gmail</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🌐</div>
+                        <div class="stat-content">
+                            <h2>Cloud Services</h2>
+                            <p class="stat-value">8</p>
+                            <p class="stat-label">Serviços ativos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status de Configuração -->
+                <div class="config-status-section">
+                    <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        <span>🔧</span> Status de Configuração dos Serviços
+                    </h2>
+                    <div id="config-status-container" class="config-status-grid">
+                        <div class="loading">⏳ Verificando configurações...</div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h2>⚡ Ações Rápidas</h2>
+                    <div class="actions-grid">
+                        <button class="action-btn" onclick="window.location.href='/cadastro.html'">
+                            <span class="icon">👤</span>
+                            <span>Cadastrar Cliente</span>
+                        </button>
+                        <button class="action-btn" onclick="navigateToSection('github')">
+                            <span class="icon">🐙</span>
+                            <span>Ver Repositórios</span>
+                        </button>
+                        <button class="action-btn" onclick="navigateToSection('mongodb')">
+                            <span class="icon">🍃</span>
+                            <span>MongoDB Atlas</span>
+                        </button>
+                        <button class="action-btn" onclick="navigateToSection('railway')">
+                            <span class="icon">🚂</span>
+                            <span>Railway</span>
+                        </button>
+                        <button class="action-btn" onclick="navigateToSection('payments')">
+                            <span class="icon">💰</span>
+                            <span>Pagamentos</span>
+                        </button>
+                        <button class="action-btn" onclick="navigateToSection('sentry')">
+                            <span class="icon">🐛</span>
+                            <span>Sentry</span>
+                        </button>
+                        <button class="action-btn" onclick="navigateToSection('dns')">
+                            <span class="icon">🌍</span>
+                            <span>DNS</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="links-section">
+                    <h2>🔗 Links Rápidos</h2>
+                    <div class="links-grid">
+                        <a href="https://avila.inc" target="_blank" rel="noopener noreferrer" class="link-card">
+                            <span class="icon">🌐</span>
+                            <span>Avila Soluções</span>
+                        </a>
+                        <a href="https://avilaops.com" target="_blank" rel="noopener noreferrer" class="link-card">
+                            <span class="icon">💻</span>
+                            <span>Avila Development</span>
+                        </a>
+                        <a href="https://docs.avila.inc" target="_blank" rel="noopener noreferrer" class="link-card">
+                            <span class="icon">📚</span>
+                            <span>Documentação</span>
+                        </a>
+                        <a href="https://support.avila.inc" target="_blank" rel="noopener noreferrer" class="link-card">
+                            <span class="icon">🎧</span>
+                            <span>Suporte Técnico</span>
+                        </a>
+                        <a href="https://linkedin.com/company/avila-devops" target="_blank" rel="noopener noreferrer" class="link-card">
+                            <span class="icon">💼</span>
+                            <span>LinkedIn</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cargo Registry Section -->
+            <section id="section-cargo" class="section">
+                <div class="section-header">
+                    <h2>📦 Cargo Registry</h2>
+                    <button class="btn-primary" onclick="refreshCargo()">🔄 Atualizar</button>
+                </div>
+                <div id="cargo-content" class="loading">
+                    <p>Carregando dados do Cargo Registry...</p>
+                </div>
+            </section>
+
+            <!-- GitHub Section -->
+            <section id="section-github" class="section">
+                <div class="section-header">
+                    <h2>🐙 GitHub</h2>
+                    <button class="btn-primary" onclick="refreshGitHub()">🔄 Atualizar</button>
+                </div>
+                <div id="github-content" class="loading">
+                    <p>Carregando repositórios do GitHub...</p>
+                </div>
+            </section>
+
+            <!-- LinkedIn Section -->
+            <section id="section-linkedin" class="section">
+                <div class="section-header">
+                    <h2>💼 LinkedIn</h2>
+                    <button class="btn-primary" onclick="refreshLinkedIn()">🔄 Atualizar</button>
+                </div>
+                
+                <!-- LinkedIn Tabs -->
+                <div class="tab-bar">
+                    <button class="tab-button active" onclick="showLinkedInTab('overview')">Visão Geral</button>
+                    <button class="tab-button" onclick="showLinkedInTab('posting')">Publicação</button>
+                    <button class="tab-button" onclick="showLinkedInTab('growth')">Crescimento</button>
+                </div>
+                
+                <!-- Overview Tab -->
+                <div id="linkedin-overview" class="tab-content active">
+                    <div id="linkedin-content" class="loading">
+                        <p>Carregando dados do LinkedIn...</p>
+                    </div>
+                </div>
+                
+                <!-- Posting Tab -->
+                <div id="linkedin-posting" class="tab-content">
+                    <div class="social-posting-container">
+                        <h3>📝 Publicação Simultânea</h3>
+                        <p style="color: #64748b; margin-bottom: 20px;">Publique simultaneamente em LinkedIn, Facebook, Instagram e WhatsApp Status</p>
+                        
+                        <div class="post-form">
+                            <textarea id="postText" placeholder="Digite seu post aqui..." rows="4" style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
+                            
+                            <div style="margin: 16px 0;">
+                                <input type="file" id="postImage" accept="image/*" style="margin-bottom: 8px;" aria-label="Selecionar imagem para post do LinkedIn">
+                                <div id="imagePreview" style="max-width: 200px; margin-top: 8px;"></div>
+                            </div>
+                            
+                            <div class="platform-selector">
+                                <h4>Plataformas:</h4>
+                                <div class="platform-options">
+                                    <label class="platform-option">
+                                        <input type="checkbox" id="platform-linkedin" checked>
+                                        <span>💼 LinkedIn</span>
+                                    </label>
+                                    <label class="platform-option">
+                                        <input type="checkbox" id="platform-facebook">
+                                        <span>📘 Facebook</span>
+                                    </label>
+                                    <label class="platform-option">
+                                        <input type="checkbox" id="platform-instagram">
+                                        <span>📷 Instagram</span>
+                                    </label>
+                                    <label class="platform-option">
+                                        <input type="checkbox" id="platform-whatsapp">
+                                        <span>💬 WhatsApp Status</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="post-actions">
+                                <button class="btn-secondary" onclick="previewPost()">👁️ Visualizar</button>
+                                <button class="btn-primary" onclick="postToAllPlatforms()">🚀 Publicar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Growth Tab -->
+                <div id="linkedin-growth" class="tab-content">
+                    <h3>🚀 Sistema de Crescimento LinkedIn</h3>
+                    <p style="color: #64748b; margin-bottom: 20px;">Automações completas para destacar seu perfil profissional</p>
+                    
+                    <div class="growth-tools">
+                        <div class="tool-card">
+                            <h4>📅 Rotina Diária Automatizada</h4>
+                            <p>Configure posts automáticos e tarefas diárias</p>
+                            <button class="btn-primary" onclick="runDailyRoutine()">▶️ Executar Rotina</button>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <h4>💬 Engagement Templates</h4>
+                            <p>60+ templates de comentários inteligentes</p>
+                            <button class="btn-secondary" onclick="showEngagementTemplates()">📋 Ver Templates</button>
+                            <button class="btn-secondary" onclick="showTodayTasks()">📅 Tarefas Hoje</button>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <h4>📈 Menu de Crescimento</h4>
+                            <p>Interface interativa para gerenciar crescimento</p>
+                            <button class="btn-secondary" onclick="openGrowthMenu()">🎛️ Abrir Menu</button>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <h4>📋 Checklist Diário</h4>
+                            <p>Guia físico para tracking de progresso</p>
+                            <button class="btn-secondary" onclick="openDailyChecklist()">📄 Abrir Checklist</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Meta Business Section -->
+            <section id="section-meta" class="section">
+                <div class="section-header">
+                    <h2>📱 Meta Business Suite</h2>
+                    <button class="btn-primary" onclick="refreshMeta()">🔄 Atualizar</button>
+                </div>
+                <div id="meta-content" class="loading">
+                    <p>Carregando dados do Meta Business...</p>
+                </div>
+            </section>
+
+            <!-- Azure DevOps Section -->
+            <section id="section-azure" class="section">
+                <div class="section-header">
+                    <h2>☁️ Azure DevOps</h2>
+                    <button class="btn-primary" onclick="refreshAzure()">🔄 Atualizar</button>
+                </div>
+                <div id="azure-content" class="loading">
+                    <p>Carregando projetos do Azure DevOps...</p>
+                </div>
+            </section>
+
+            <!-- Calendário Section -->
+            <section id="section-calendario" class="section">
+                <div class="section-header">
+                    <h2>📅 Calendário de Compromissos</h2>
+                </div>
+                <div class="service-card">
+                    <form id="calendar-form" style="display: grid; gap: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Título do Compromisso:</label>
+                            <input type="text" id="titulo" placeholder="Ex: Reunião com cliente" required
+                                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Descrição:</label>
+                            <textarea id="descricao" rows="4" placeholder="Detalhes do compromisso..."
+                                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em; resize: vertical;"></textarea>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">🔗 Link da Reunião (opcional):</label>
+                            <input type="url" id="linkReuniao" placeholder="https://meet.google.com/abc-defg-hij"
+                                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
+                            <small style="color: #94a3b8; margin-top: 4px; display: block;">Google Meet, Zoom, Teams, etc. - Abrirá automaticamente no horário!</small>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Data:</label>
+                                <input type="date" id="data" required
+                                    style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Hora:</label>
+                                <input type="time" id="hora" required
+                                    style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #64748b; font-weight: 500;">Lembrete:</label>
+                            <select id="lembrete"
+                                style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1em;">
+                                <option value="0">No momento do compromisso</option>
+                                <option value="15">15 minutos antes</option>
+                                <option value="30">30 minutos antes</option>
+                                <option value="60">1 hora antes</option>
+                                <option value="1440">1 dia antes</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 0;">
+                            <button type="submit" class="btn-primary" style="padding: 14px; font-size: 1.5em; flex: 1; border-radius: 8px 0 0 8px;" title="Agendar no Windows">
+                                ⏰
+                            </button>
+                            <button type="button" onclick="enviarEmailCompromisso()" class="btn-primary" style="padding: 14px; font-size: 1.5em; flex: 1; background: #10b981; border-radius: 0 8px 8px 0; border-left: 2px solid rgba(255,255,255,0.2);" title="Enviar Email">
+                                ✉️
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px;">📋 Compromissos Salvos</h3>
+                    <div id="lista-compromissos" class="stats-grid">
+                        <!-- Lista de compromissos será carregada aqui -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- MongoDB Section -->
+            <section id="section-mongodb" class="section">
+                <div class="section-header">
+                    <h2>🍃 MongoDB Atlas</h2>
+                    <button class="btn-primary" onclick="loadMongoDBData()">🔄 Atualizar</button>
+                </div>
+                <div id="mongodb-content" class="loading">
+                    <p>Carregando databases do MongoDB Atlas...</p>
+                </div>
+            </section>
+
+            <!-- Lightroom Inspector Section -->
+            <section id="section-lightroom" class="section">
+                <div class="section-header">
+                    <h2>🔬 Lightroom Inspector</h2>
+                    <button class="btn-primary" onclick="runSystemInspection()">🔍 Escanear Sistema</button>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px; color: white; margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 10px; font-size: 1.5em;">🎯 Análise Completa do Sistema</h3>
+                    <p style="opacity: 0.9;">Detecta defeitos, erros, problemas de performance e sugere melhorias em tempo real.</p>
+                </div>
+                
+                <div id="inspection-results" style="display: none;">
+                    <!-- Resultados da inspeção -->
+                </div>
+                
+                <div id="inspection-placeholder" style="text-align: center; padding: 60px 20px; color: #64748b;">
+                    <div style="font-size: 4em; margin-bottom: 20px;">🔬</div>
+                    <h3 style="color: #475569; margin-bottom: 10px;">Pronto para Inspeção</h3>
+                    <p>Clique em "Escanear Sistema" para iniciar a análise completa</p>
+                </div>
+            </section>
+
+            <!-- Railway Section -->
+            <section id="section-railway" class="section">
+                <div class="section-header">
+                    <h2>🚂 Railway</h2>
+                    <button class="btn-primary" onclick="loadRailwayData()">🔄 Atualizar</button>
+                </div>
+                <div id="railway-content" class="loading">
+                    <p>Carregando projetos do Railway...</p>
+                </div>
+            </section>
+
+            <!-- Continue with other sections... -->
+            <section id="section-gcloud" class="section">
+                <h2>🌐 Google Cloud Platform</h2>
+                <div id="gcloud-content" class="loading">
+                    <p>Carregando projetos do Google Cloud...</p>
+                </div>
+            </section>
+
+            <section id="section-gmail" class="section">
+                <div class="section-header">
+                    <h1>📧 Gmail - Integração Completa</h1>
+                    <p>Sincronize emails e contatos de todas as contas Gmail</p>
+                </div>
+
+                <div class="gmail-tabs">
+                    <button class="tab-btn active" onclick="showGmailTab('overview')">📊 Visão Geral</button>
+                    <button class="tab-btn" onclick="showGmailTab('emails')">📧 Emails</button>
+                    <button class="tab-btn" onclick="showGmailTab('contacts')">👥 Contatos</button>
+                    <button class="tab-btn" onclick="showGmailTab('sync')">🔄 Sincronização</button>
+                </div>
+
+                <div id="gmail-overview-tab" class="gmail-tab active">
+                    <div class="gmail-stats">
+                        <div class="stat-card">
+                            <h3>📧 Emails Sincronizados</h3>
+                            <p id="gmail-total-emails">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>👥 Contatos Sincronizados</h3>
+                            <p id="gmail-total-contacts">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>📬 Contas Conectadas</h3>
+                            <p id="gmail-accounts-count">0</p>
+                        </div>
+                    </div>
+                    <div id="gmail-overview-content">
+                        <div class="loading">⏳ Carregando estatísticas...</div>
+                    </div>
+                </div>
+
+                <div id="gmail-emails-tab" class="gmail-tab">
+                    <div class="gmail-actions">
+                        <select id="gmail-account-filter" onchange="loadGmailEmails()" aria-label="Filtrar emails por conta Gmail">
+                            <option value="">Todas as contas</option>
+                        </select>
+                        <button class="btn-primary" onclick="loadGmailEmails()">🔄 Atualizar</button>
+                    </div>
+                    <div id="gmail-emails-container" class="data-table">
+                        <div class="loading">⏳ Carregando emails...</div>
+                    </div>
+                </div>
+
+                <div id="gmail-contacts-tab" class="gmail-tab">
+                    <div class="gmail-actions">
+                        <select id="gmail-contacts-account-filter" onchange="loadGmailContacts()" aria-label="Filtrar contatos por conta Gmail">
+                            <option value="">Todas as contas</option>
+                        </select>
+                        <button class="btn-primary" onclick="loadGmailContacts()">🔄 Atualizar</button>
+                    </div>
+                    <div id="gmail-contacts-container" class="data-table">
+                        <div class="loading">⏳ Carregando contatos...</div>
+                    </div>
+                </div>
+
+                <div id="gmail-sync-tab" class="gmail-tab">
+                    <div class="sync-section">
+                        <h3>🔐 Autenticação OAuth2</h3>
+                        <p>Conecte suas contas Gmail para sincronização:</p>
+                        <div id="gmail-auth-buttons" class="auth-buttons">
+                            <div class="loading">⏳ Carregando contas...</div>
+                        </div>
+                    </div>
+
+                    <div class="sync-section">
+                        <h3>📧 Sincronizar Emails</h3>
+                        <p>Sincronize os emails das últimas semanas:</p>
+                        <button class="btn-primary" onclick="syncGmailEmails()">🚀 Sincronizar Emails</button>
+                        <div id="sync-emails-status"></div>
+                    </div>
+
+                    <div class="sync-section">
+                        <h3>👥 Sincronizar Contatos</h3>
+                        <p>Sincronize todos os contatos do Google:</p>
+                        <button class="btn-primary" onclick="syncGmailContacts()">🚀 Sincronizar Contatos</button>
+                        <div id="sync-contacts-status"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-dns" class="section">
+                <h2>🌍 DNS Management</h2>
+                <div id="dns-content"></div>
+            </section>
+
+            <section id="section-payments" class="section">
+                <h2>💰 Payment Services</h2>
+                <div id="payments-content"></div>
+            </section>
+
+            <section id="section-ai" class="section">
+                <h2>🤖 AI & ML Services</h2>
+                <div id="ai-content"></div>
+            </section>
+
+            <section id="section-gravatar" class="section">
+                <h2>👤 Gravatar</h2>
+                <div id="gravatar-content"></div>
+            </section>
+
+            <section id="section-sentry" class="section">
+                <h2>🐛 Sentry - Error Tracking</h2>
+                <div id="sentry-content"></div>
+            </section>
+
+            <!-- Social Post Section -->
+            <section id="section-social-post" class="section">
+                <div class="section-header">
+                    <h2>📤 Postar em Todas as Redes Sociais</h2>
+                    <p style="color: #64748b; margin-top: 8px;">Publique simultaneamente em LinkedIn, Facebook, Instagram e WhatsApp Status</p>
+                </div>
+
+                <div class="service-card" style="max-width: 800px; margin: 0 auto;">
+                    <form id="social-post-form" style="display: grid; gap: 24px;">
+                        <!-- Texto do Post -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #334155; font-weight: 600; font-size: 1.05em;">
+                                ✍️ Texto do Post *
+                            </label>
+                            <textarea id="post-text" rows="6" placeholder="Digite seu texto aqui... 
+
+Use hashtags para maior alcance!
+#exemplo #marketingdigital #empreendedorismo" required
+                                style="width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 1em; resize: vertical; font-family: inherit;"></textarea>
+                            <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+                                <span id="char-count" style="color: #94a3b8; font-size: 0.9em;">0 caracteres</span>
+                                <span style="color: #94a3b8; font-size: 0.9em;">💡 Máx: 3000 caracteres</span>
+                            </div>
+                        </div>
+
+                        <!-- Upload de Imagem -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: #334155; font-weight: 600; font-size: 1.05em;">
+                                🖼️ Imagem (Opcional)
+                            </label>
+                            <div style="position: relative;">
+                                <input type="file" id="post-image" accept="image/*" 
+                                    style="display: none;" onchange="previewImage(event)" aria-label="Selecionar imagem para publicação em redes sociais">
+                                <div id="image-upload-area" onclick="document.getElementById('post-image').click()"
+                                    style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: #f8fafc;">
+                                    <div id="image-preview" style="display: none;">
+                                        <img id="preview-img" alt="Pré-visualização da imagem selecionada" style="max-width: 100%; max-height: 400px; border-radius: 8px; margin-bottom: 16px;">
+                                        <button type="button" onclick="removeImage(event)" class="btn-secondary" style="background: #ef4444; color: white;">
+                                            🗑️ Remover Imagem
+                                        </button>
+                                    </div>
+                                    <div id="upload-placeholder">
+                                        <div style="font-size: 48px; margin-bottom: 12px;">📷</div>
+                                        <h3 style="margin-bottom: 8px; color: #334155;">Clique para adicionar uma imagem</h3>
+                                        <p style="color: #94a3b8; font-size: 0.95em;">JPG, PNG ou GIF • Máx 10MB</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Seletor de Plataformas -->
+                        <div>
+                            <label style="display: block; margin-bottom: 12px; color: #334155; font-weight: 600; font-size: 1.05em;">
+                                🎯 Selecione as Plataformas
+                            </label>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                                <label style="display: flex; align-items: center; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: white;">
+                                    <input type="checkbox" id="platform-modal-linkedin" checked style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
+                                    <span style="font-size: 24px; margin-right: 10px;">💼</span>
+                                    <span style="font-weight: 500; color: #334155;">LinkedIn</span>
+                                </label>
+                                <label style="display: flex; align-items: center; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: white;">
+                                    <input type="checkbox" id="platform-modal-facebook" checked style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
+                                    <span style="font-size: 24px; margin-right: 10px;">📘</span>
+                                    <span style="font-weight: 500; color: #334155;">Facebook</span>
+                                </label>
+                                <label style="display: flex; align-items: center; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: white;">
+                                    <input type="checkbox" id="platform-modal-instagram" checked style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
+                                    <span style="font-size: 24px; margin-right: 10px;">📸</span>
+                                    <span style="font-weight: 500; color: #334155;">Instagram</span>
+                                </label>
+                                <label style="display: flex; align-items: center; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: white;">
+                                    <input type="checkbox" id="platform-modal-whatsapp" checked style="width: 20px; height: 20px; margin-right: 12px; cursor: pointer;">
+                                    <span style="font-size: 24px; margin-right: 10px;">💬</span>
+                                    <span style="font-weight: 500; color: #334155;">WhatsApp Status</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                            <button type="button" onclick="previewPost()" class="btn-secondary" style="padding: 16px; font-size: 1.05em;">
+                                👁️ Pré-visualizar
+                            </button>
+                            <button type="submit" class="btn-primary" style="padding: 16px; font-size: 1.05em; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                🚀 Publicar em Todos
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Status de Publicação -->
+                    <div id="post-status" style="display: none; margin-top: 32px; padding: 24px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #3b82f6;">
+                        <h3 style="margin-bottom: 16px; color: #334155;">📊 Status da Publicação</h3>
+                        <div id="status-items" style="display: grid; gap: 12px;">
+                            <!-- Status items will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CRM Section -->
+            <section id="section-crm" class="section">
+                <div class="section-header">
+                    <h1>🤝 CRM & Leads</h1>
+                    <p>Gerencie seus leads, contatos e pipeline de vendas</p>
+                </div>
+
+                <div id="crm-content">
+                    <!-- Conteúdo do CRM será carregado aqui -->
+                </div>
+
+                <div class="crm-tabs" style="display: none;">
+                    <button class="tab-btn active" onclick="showCrmTab('leads')">📋 Leads</button>
+                    <button class="tab-btn" onclick="showCrmTab('contacts')">📞 Contatos</button>
+                    <button class="tab-btn" onclick="showCrmTab('pipeline')">📊 Pipeline</button>
+                </div>
+
+                <div id="crm-leads-tab" class="crm-tab active" style="display: none;">
+                    <div class="crm-actions">
+                        <button class="btn-primary" onclick="loadCrmLeads()">🔄 Atualizar Leads</button>
+                        <button class="btn-secondary" onclick="sendMarketingEmails()">📧 Enviar Emails</button>
+                        <button class="btn-success" onclick="fazerBackupCompleto()">💾 Backup Completo</button>
+                        <button class="btn-info" onclick="exportarContatosCSV()">📊 Exportar CSV</button>
+                        <button class="btn-warning" onclick="verificarSaudeDados()">🔍 Verificar Dados</button>
+                    </div>
+                    <div id="leads-container" class="data-table">
+                        <div class="loading">⏳ Carregando leads...</div>
+                    </div>
+                </div>
+
+                <div id="crm-contacts-tab" class="crm-tab">
+                    <div class="crm-actions">
+                        <button class="btn-primary" onclick="loadContacts()">🔄 Carregar Contatos</button>
+                        <button class="btn-success" onclick="fazerBackupCompleto()">💾 Backup Completo</button>
+                        <button class="btn-info" onclick="exportarContatosCSV()">📊 Exportar CSV</button>
+                        <button class="btn-warning" onclick="verificarSaudeDados()">🔍 Verificar Dados</button>
+                    </div>
+                    <div id="contacts-container" class="data-table">
+                        <div class="loading">⏳ Carregando contatos...</div>
+                    </div>
+                </div>
+
+                <div id="crm-pipeline-tab" class="crm-tab">
+                    <div class="pipeline-stats">
+                        <div class="stat-card">
+                            <h3>📥 Novos</h3>
+                            <p id="pipeline-novos">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>💬 Negociação</h3>
+                            <p id="pipeline-negociacao">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>✅ Fechados</h3>
+                            <p id="pipeline-fechados">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>❌ Perdidos</h3>
+                            <p id="pipeline-perdidos">0</p>
+                        </div>
+                    </div>
+                    <div id="pipeline-container" class="pipeline-view">
+                        <div class="loading">⏳ Carregando pipeline...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Biblioteca & E-Reader Section -->
+            <section id="section-biblioteca" class="section">
+                <div class="section-header">
+                    <h1>📚 Biblioteca & Leitura</h1>
+                    <p>Seus livros e sistema de leitura diária com reflexões</p>
+                </div>
+
+                <div id="metaLeituraContainer"></div>
+                
+                <div class="ereader-container">
+                    <!-- Sidebar da Biblioteca -->
+                    <div class="biblioteca-sidebar">
+                        <div class="biblioteca-header">
+                            <span style="font-size: 32px;">📚</span>
+                            <h3>Minha Biblioteca</h3>
+                        </div>
+                        <div id="bibliotecaLivros"></div>
+                    </div>
+                    
+                    <!-- Leitor Principal -->
+                    <div class="leitor-principal">
+                        <div class="leitor-header">
+                            <div class="leitor-info" id="leitorInfo">
+                                <h2>Selecione um livro</h2>
+                                <p>Escolha um livro da biblioteca para começar</p>
+                            </div>
+                            <div class="leitor-controles">
+                                <button class="controle-btn" onclick="ereaderSystem.renderizarMetaLeitura()">
+                                    📊 Estatísticas
+                                </button>
+                                <button class="controle-btn primary" onclick="showSection('diario')">
+                                    📔 Ir para Diário
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="leitor-conteudo">
+                            <iframe id="pdfViewer" class="pdf-viewer" 
+                                    src="" 
+                                    type="application/pdf">
+                            </iframe>
+                        </div>
+                        
+                        <div class="navegacao-paginas">
+                            <button id="btnPaginaAnterior" 
+                                    class="nav-btn" 
+                                    onclick="ereaderSystem.paginaAnterior()">
+                                ← Anterior
+                            </button>
+                            
+                            <div class="pagina-info" id="paginaInfo">
+                                <span>Selecione um livro</span>
+                            </div>
+                            
+                            <button id="btnPaginaProxima" 
+                                    class="nav-btn" 
+                                    onclick="ereaderSystem.proximaPagina()">
+                                Próxima →
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Bloco de Notas Rápidas (Sidebar Direita) -->
+                    <div class="notas-sidebar">
+                        <div class="notas-header">
+                            <h3>📝 Notas de Leitura</h3>
+                            <button class="btn-clear-notes" onclick="ereaderSystem.limparNotas()">🗑️</button>
+                        </div>
+                        <textarea id="notasRapidas" 
+                                  class="notas-textarea" 
+                                  placeholder="✏️ Use este espaço para:
+
+• Insights do livro
+• Citações importantes
+• Reflexões
+• Ideias que surgiram
+• Conexões com sua vida
+
+Auto-salva a cada 2 segundos!"
+                                  oninput="ereaderSystem.salvarNotasRapidas()"></textarea>
+                        <div class="notas-info">
+                            <span id="notasCount">0 caracteres</span>
+                            <span id="notasStatus">✓ Salvo</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Perguntas do Dia -->
+                <div id="perguntasDoDia" style="margin-top: 20px;"></div>
+            </section>
+
+            <!-- Diário Pessoal Section -->
+            <section id="section-diario" class="section">
+                <div class="section-header">
+                    <h1>📔 Diário Pessoal</h1>
+                    <p>Seu espaço privado para reflexões, pensamentos e desabafos</p>
+                </div>
+
+                <div class="diario-layout">
+                    <!-- Diário Principal -->
+                    <div class="diario-container">
+                        <div class="diario-header">
+                            <h2>
+                                <span>✍️</span>
+                                Meu Diário
+                            </h2>
+                            <div class="diario-opcoes">
+                                <button class="controle-btn" onclick="ereaderSystem.exportarDiario()">
+                                    📥 Exportar
+                                </button>
+                                <button class="controle-btn primary" onclick="showSection('biblioteca')">
+                                    📚 Voltar para Leitura
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="diario-conteudo">
+                            <!-- Nova Entrada -->
+                            <div class="nova-entrada">
+                                <h3 style="margin-bottom: 15px;">✨ Nova Entrada</h3>
+                                <textarea id="novaEntradaTexto" 
+                                          placeholder="Escreva aqui seus pensamentos, reflexões, desabafos... Este é seu espaço seguro para expressar tudo que você sente e pensa. 
+
+💭 Como foi seu dia?
+🌟 O que te inspirou?
+😔 O que te preocupa?
+🎯 Quais são suas metas?
+📚 O que aprendeu hoje?
+
+Não há limites, escreva livremente..."></textarea>
+                                
+                                <div class="entrada-controles">
+                                    <div class="humor-selector">
+                                        <span style="margin-right: 10px; color: #666;">Como você está?</span>
+                                        <button class="humor-btn selected" 
+                                                onclick="ereaderSystem.selecionarHumor('😊')">😊</button>
+                                        <button class="humor-btn" 
+                                                onclick="ereaderSystem.selecionarHumor('😃')">😃</button>
+                                        <button class="humor-btn" 
+                                                onclick="ereaderSystem.selecionarHumor('😐')">😐</button>
+                                        <button class="humor-btn" 
+                                                onclick="ereaderSystem.selecionarHumor('😔')">😔</button>
+                                        <button class="humor-btn" 
+                                                onclick="ereaderSystem.selecionarHumor('😢')">😢</button>
+                                        <button class="humor-btn" 
+                                                onclick="ereaderSystem.selecionarHumor('😤')">😤</button>
+                                        <button class="humor-btn" 
+                                                onclick="ereaderSystem.selecionarHumor('🤔')">🤔</button>
+                                        <button class="humor-btn" 
+                                                onclick="ereaderSystem.selecionarHumor('😍')">😍</button>
+                                    </div>
+                                    
+                                    <button class="salvar-entrada-btn" 
+                                            onclick="ereaderSystem.salvarEntradaDiario()">
+                                        💾 Salvar no Diário
+                                    </button>
+                                </div>
+                            </div>
+                        
+                        <!-- Entradas Antigas -->
+                        <div style="margin-top: 30px;">
+                            <h3 style="margin-bottom: 20px; color: #666;">📖 Entradas Anteriores</h3>
+                            <div id="diarioEntradas"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Financial Section -->
+            <section id="section-financeiro" class="section">
+                <div class="section-header">
+                    <h1>💰 Financeiro</h1>
+                    <p>Controle seus extratos bancários e transações</p>
+                </div>
+
+                <div class="financial-summary">
+                    <div class="stat-card">
+                        <h3>💳 Transações</h3>
+                        <p id="total-transactions">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>📈 Entradas</h3>
+                        <p id="total-entradas">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>📉 Saídas</h3>
+                        <p id="total-saidas">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>⚖️ Saldo</h3>
+                        <p id="saldo-total">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <div class="financial-actions">
+                    <button class="btn-primary" onclick="loadExtratos()">🔄 Atualizar Extratos</button>
+                    <button class="btn-secondary" onclick="exportExtratos()">📊 Exportar CSV</button>
+                </div>
+
+                <div id="extratos-container" class="data-table">
+                    <div class="loading">⏳ Carregando extratos...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <link rel="stylesheet" href="/css/ereader.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/css/ereader.css"></noscript>
+    <script defer src="/js/ereader.js?v=4"></script>
+    <script defer src="/js/dashboard.js?v=4"></script>
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('✅ Service Worker registrado!', reg.scope))
+                    .catch(err => console.log('❌ Erro ao registrar Service Worker:', err));
+            });
+        }
+        
+        // Dark Mode Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Atualizar ícone
+            const icon = document.getElementById('theme-toggle');
+            icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+        
+        // Carregar tema salvo
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        window.addEventListener('DOMContentLoaded', () => {
+            const icon = document.getElementById('theme-toggle');
+            if (icon) {
+                icon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+            }
+        });
+        
+        // Inicializar E-Reader ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            ereaderSystem = new EReaderSystem();
+        });
+        
+        // Lazy load Google Analytics após interação do usuário
+        let gaLoaded = false;
+        function loadGoogleAnalytics() {
+            if (gaLoaded) return;
+            gaLoaded = true;
+            
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
+            document.head.appendChild(script);
+            
+            script.onload = function() {
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-XXXXXXXXXX');
+            };
+        }
+        
+        // Carregar GA após 3s ou na primeira interação
+        setTimeout(loadGoogleAnalytics, 3000);
+        ['scroll', 'click', 'mousemove', 'keydown'].forEach(event => {
+            window.addEventListener(event, loadGoogleAnalytics, { once: true, passive: true });
+        });
+    </script>
+</body>
+</html>

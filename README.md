@@ -1,39 +1,63 @@
-# Gerenciador Pessoal - Avila Dashboard
+# Gerenciador Pessoal - Avila Dashboard v2.1.0
 
 Sistema unificado de gerenciamento pessoal com integração completa de dados, CRM, Gmail, LinkedIn e muito mais.
 
-## 📁 Estrutura do Projeto
+## 📁 Estrutura do Projeto (v2.1.0 - Reorganizada)
 
 ```
-gerenciador-pessoal/
-├── src/                          # Código fonte
-│   ├── public/                   # Arquivos estáticos
-│   │   ├── assets/              # Imagens, ícones, manifest
-│   │   ├── css/                 # Folhas de estilo
-│   │   └── js/                  # Scripts do frontend
+manager/
+├── src/                          # Código fonte TypeScript
+│   ├── server.ts                # Servidor principal
 │   ├── views/                   # Templates HTML
-│   ├── routes/                  # Rotas do backend
+│   ├── routes/                  # Rotas da API
+│   ├── services/                # Serviços de integração
 │   ├── middleware/              # Middlewares Express
+│   ├── config/                  # Configurações
 │   ├── utils/                   # Utilitários
-│   └── config/                  # Configurações
-├── data/                        # Dados locais
-│   ├── backups/                 # Backups automáticos
-│   └── uploads/                 # Arquivos enviados
+│   ├── types/                   # Definições TypeScript
+│   ├── components/              # Componentes reutilizáveis
+│   └── public/                  # Assets do frontend
+│       ├── css/                 # Estilos
+│       ├── js/                  # Scripts cliente
+│       └── assets/              # Imagens, ícones
+├── public/                      # Arquivos estáticos servidos
+│   ├── html/                    # Páginas HTML públicas
+│   ├── css/                     # CSS compilados
+│   └── js/                      # JavaScript compilados
+├── dist/                        # Build TypeScript (gitignored)
 ├── docs/                        # Documentação
-├── scripts/                     # Scripts de automação
+│   ├── DEPLOY-INSTRUCTIONS.md
+│   ├── IMPROVEMENTS.md
+│   └── WHITE_LABEL_SYSTEM.md
 ├── tests/                       # Testes
-├── Alimentacao/                 # Dados de alimentação
-├── contacts/                    # Contatos VCF
-├── Extrato-bancario/           # Extratos bancários
-├── Livros/                      # Biblioteca pessoal
-├── Treino/                      # Dados de treino
-├── AI-ML/                       # Projetos de IA/ML
-├── .env                         # Variáveis de ambiente
-├── .env.example                 # Exemplo de configuração
-├── package.json                 # Dependências Node.js
-├── server.js                    # Servidor principal
-└── README.md                    # Esta documentação
+├── data/                        # Dados e uploads
+│   └── uploads/
+├── contacts/                    # Scripts de contatos
+├── package.json                 # Dependências
+├── tsconfig.json                # Config TypeScript
+├── render.yaml                  # Config Render.com
+└── README.md                    # Este arquivo
 ```
+
+## ✨ Novidades da Versão 2.1.0
+
+### 🔄 Reestruturação Completa do Repositório
+- **Reorganização de arquivos estáticos**: Criação da pasta `public/` na raiz para melhor separação de assets
+- **Consolidação de documentação**: Toda documentação movida para `docs/`
+- **Limpeza de arquivos temporários**: Remoção de executáveis, testes obsoletos e arquivos não necessários
+- **Estrutura mais clara**: Separação lógica entre código fonte (`src/`) e arquivos servidos (`public/`)
+
+### 📦 Arquivos Movidos
+- `dashboard.css` → `public/css/`
+- `dashboard.js` → `public/js/`
+- `index.html` → `public/html/`
+- `mongo-explorer.html` → `public/html/`
+- Documentação → `docs/`
+
+### 🗑️ Limpeza Realizada
+- Remoção de executáveis (ngrok.exe, ngrok.zip)
+- Remoção de scripts de teste obsoletos
+- Remoção de arquivos temporários e duplicados
 
 ## 🚀 Funcionalidades
 
