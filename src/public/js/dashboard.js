@@ -1,7 +1,7 @@
 // Configurações
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000/api'
-    : 'https://manager-api.railway.app/api'; // Altere para sua URL de backend em produção
+    : 'https://manager-api.onrender.com/api'; // ATENÇÃO: Altere 'manager-api' para o nome do seu app no Render
 
 // Configuração mockada para frontend (quando backend não disponível)
 const CONFIG = {
