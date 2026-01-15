@@ -51,12 +51,17 @@ async function loadDashboardData() {
     // Carregar contagem do GitHub
     try {
         const response = await fetch(`${API_BASE}/github/repos`);
+        
+        if (!response.ok) {
+            throw new Error('Backend não disponível');
+        }
+        
         const data = await response.json();
         if (data.success) {
             document.getElementById('github-count').textContent = data.repos.length;
         }
     } catch (error) {
-        console.log('GitHub não configurado');
+        console.log('⚠️ GitHub: Backend não disponível');
     }
     
     // Carregar status de configuração
@@ -70,6 +75,11 @@ async function loadConfigurationStatus() {
     
     try {
         const response = await fetch(`${API_BASE}/config/status`);
+        
+        if (!response.ok) {
+            throw new Error(`Backend não disponível (${response.status})`);
+        }
+        
         const data = await response.json();
         
         if (!data.success) throw new Error('Erro ao carregar status');
@@ -222,10 +232,23 @@ async function loadConfigurationStatus() {
         container.innerHTML = html;
         
     } catch (error) {
-        console.error('Erro ao carregar status:', error);
+        console.log('⚠️ Backend não disponível:', error.message);
         container.innerHTML = `
-            <div class="service-card" style="background: #fee2e2; border-left: 4px solid #ef4444;">
-                <p style="color: #991b1b;">❌ Erro ao verificar configurações: ${error.message}</p>
+            <div class="service-card" style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px;">
+                <h3 style="margin: 0 0 10px 0; color: #92400e; display: flex; align-items: center; gap: 8px;">
+                    ⚙️ Backend não conectado
+                </h3>
+                <p style="color: #78350f; margin: 8px 0; line-height: 1.6;">
+                    O dashboard está funcionando em modo frontend apenas. Para verificar as configurações dos serviços:
+                </p>
+                <ul style="color: #78350f; margin: 10px 0 10px 20px; line-height: 1.8;">
+                    <li>Configure o backend em: <code style="background: #fde68a; padding: 2px 6px; border-radius: 3px;">server.js</code></li>
+                    <li>Inicie o servidor: <code style="background: #fde68a; padding: 2px 6px; border-radius: 3px;">npm start</code></li>
+                    <li>Ou faça deploy do backend no Railway/Heroku</li>
+                </ul>
+                <p style="color: #92400e; margin-top: 12px; font-size: 0.9em;">
+                    💡 Dica: O dashboard funciona offline, mas recursos avançados requerem o backend.
+                </p>
             </div>
         `;
     }
