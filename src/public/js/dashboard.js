@@ -3365,10 +3365,10 @@ function previewPost() {
     }
     
     const platforms = [];
-    if (document.getElementById('platform-linkedin').checked) platforms.push('LinkedIn');
-    if (document.getElementById('platform-facebook').checked) platforms.push('Facebook');
-    if (document.getElementById('platform-instagram').checked) platforms.push('Instagram');
-    if (document.getElementById('platform-whatsapp').checked) platforms.push('WhatsApp');
+    if (document.getElementById('platform-modal-linkedin').checked) platforms.push('LinkedIn');
+    if (document.getElementById('platform-modal-facebook').checked) platforms.push('Facebook');
+    if (document.getElementById('platform-modal-instagram').checked) platforms.push('Instagram');
+    if (document.getElementById('platform-modal-whatsapp').checked) platforms.push('WhatsApp');
     
     const hasImage = document.getElementById('post-image').files.length > 0;
     
@@ -3387,10 +3387,10 @@ document.getElementById('social-post-form')?.addEventListener('submit', async fu
     const imageFile = document.getElementById('post-image').files[0];
     
     const platforms = {
-        linkedin: document.getElementById('platform-linkedin').checked,
-        facebook: document.getElementById('platform-facebook').checked,
-        instagram: document.getElementById('platform-instagram').checked,
-        whatsapp: document.getElementById('platform-whatsapp').checked
+        linkedin: document.getElementById('platform-modal-linkedin').checked,
+        facebook: document.getElementById('platform-modal-facebook').checked,
+        instagram: document.getElementById('platform-modal-instagram').checked,
+        whatsapp: document.getElementById('platform-modal-whatsapp').checked
     };
     
     if (!Object.values(platforms).some(v => v)) {
