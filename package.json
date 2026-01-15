@@ -4,9 +4,13 @@
   "description": "Backend para Avila Dashboard - Integração com todos os serviços",
   "type": "module",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
-    "start": "node server.js",
-    "start:prod": "node dist/server.js",
+    "start": "node dist/server.js",
+    "start:dev": "node server.js",
     "start:refactored": "node server.refactored.js",
     "dev": "nodemon server.js",
     "dev:refactored": "nodemon server.refactored.js",
@@ -40,6 +44,7 @@
     "node-fetch": "^2.7.0",
     "nodemailer": "^6.9.7",
     "stripe": "^14.7.0",
+    "typescript": "^5.9.3",
     "winston": "^3.11.0"
   },
   "devDependencies": {
@@ -50,7 +55,6 @@
     "@types/node": "^25.0.7",
     "@types/nodemailer": "^7.0.5",
     "nodemon": "^3.1.11",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "ts-node": "^10.9.2"
   }
 }

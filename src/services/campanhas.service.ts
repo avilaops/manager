@@ -96,7 +96,7 @@ export class CampanhasService {
     }
 
     // Verificar alertas
-    const alertas = this.verificarAlertas(campanha, kpisAtualizados);
+    const alertas = this.verificarAlertas(campanha as unknown as Campanha, kpisAtualizados);
 
     // Adicionar ao histórico
     const historicoEntry: HistoricoKPIs = {
@@ -109,10 +109,10 @@ export class CampanhasService {
       {
         $set: { kpis: kpisAtualizados },
         $push: {
-          alertas: { $each: alertas },
-          historico: historicoEntry
+          alertas: { $each: alertas } as any,
+          historico: historicoEntry as any
         }
-      }
+      } as any
     );
 
     return { kpis: kpisAtualizados, alertas };
@@ -158,12 +158,12 @@ export class CampanhasService {
     }
 
     // Verificar orçamento gasto
-    const progressoCampanha = (new Date() - new Date(campanha.dataInicio)) / (new Date(campanha.dataFim) - new Date(campanha.dataInicio));
+    const progressoCampanha = (new Date().getTime() - new Date(campanha.dataInicio).getTime()) / (new Date(campanha.dataFim).getTime() - new Date(campanha.dataInicio).getTime());
     if (campanha.orcamentoGasto > campanha.orcamento * progressoCampanha * 1.2) {
       alertas.push({
         id: `alert-${Date.now()}-budget`,
         tipo: 'orcamento_alto',
-        mensagem: `Orçamento gasto (R$ ${campanha.orcamentoGasto.toFixed(2)}) está ${(campanha.orcamentoGasto / (campanha.orcamento * progressoCampanha) - 1) * 100.toFixed(1)}% acima do planejado`,
+        mensagem: `Orçamento gasto (R$ ${campanha.orcamentoGasto.toFixed(2)}) está ${((campanha.orcamentoGasto / (campanha.orcamento * progressoCampanha) - 1) * 100).toFixed(1)}% acima do planejado`,
         severidade: 'alta',
         data: new Date().toISOString(),
         resolvido: false
