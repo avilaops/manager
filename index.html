@@ -3,50 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avila Dashboard - Gerenciamento Unificado</title>
-    <meta http-equiv="refresh" content="0; url=dashboard.html">
+    <title>Login - Avila Dashboard</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px;
+        
+        .login-container {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .login-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
-            backdrop-filter: blur(10px);
+            font-size: 15px;
+            transition: all 0.3s;
+            outline: none;
         }
-        h1 {
+        
+        .form-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            display: none;
+            text-align: center;
+            font-size: 14px;
         }
-        p {
-            margin-bottom: 30px;
+        
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s;
         }
-        .redirect {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 Avila Dashboard</h1>
-        <p>Gerenciamento Unificado</p>
-        <div class="redirect">
-            <p>Redirecionando para o dashboard...</p>
-            <p>Se não redirecionar automaticamente, <a href="dashboard.html" style="color: #fff; text-decoration: underline;">clique aqui</a></p>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🚀 Avila Dashboard</h1>
+            <p>Faça login para continuar</p>
         </div>
+        
+        <div class="error-message" id="errorMessage">
+            Email ou senha incorretos
+        </div>
+        
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="seu@email.com"
+                    required 
+                    autocomplete="username"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="••••••••"
+                    required 
+                    autocomplete="current-password"
+                >
+            </div>
+            
+            <button type="submit" class="login-button">
+                Entrar
+            </button>
+        </form>
+    </div>
+    
+    <script>
+        // Credenciais válidas
+        const validCredentials = [
+            { email: 'nicolas@avila.inc', password: '7Aciqgr7@', name: 'Nicolas Avila' },
+            { email: 'adm@grdcompany', password: 'Grd@123', name: 'Administrador GRD' }
+        ];
+        
+        // Verificar se já está logado
+        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = 'dashboard.html';
+        }
+        
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Verificar credenciais
+            const user = validCredentials.find(
+                cred => cred.email === email && cred.password === password
+            );
+            
+            if (user) {
+                // Login bem-sucedido
+                sessionStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.setItem('userEmail', user.email);
+                sessionStorage.setItem('userName', user.name);
+                
+                // Redirecionar para o dashboard
+                window.location.href = 'dashboard.html';
+            } else {
+                // Mostrar erro
+                errorMessage.classList.add('show');
+                document.getElementById('password').value = '';
+                
+                // Remover mensagem de erro após 3 segundos
+                setTimeout(() => {
+                    errorMessage.classList.remove('show');
+                }, 3000);
+            }
+        }
+        
+        // Limpar mensagem de erro ao digitar
+        document.getElementById('email').addEventListener('input', () => {
+            document.getElementById('errorMessage').classList.remove('show');
+        });
+        
+        document.getElementById('password').addEventListener('input', () => {
+            document.getElementById('errorMessage').classList.remove('show');
+        });
+    </script>
     </div>
 </body>
 </html>

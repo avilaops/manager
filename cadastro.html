@@ -11,6 +11,12 @@
     <meta name="apple-mobile-web-app-title" content="Avx" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css" />
+    <script>
+        // Verificar autenticação
+        if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
     <style>
         * {
             margin: 0;
