@@ -22,7 +22,26 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../')));
+app.use(express.static(path.join(__dirname, '../public')));
+app.use('/css', express.static(path.join(__dirname, '../src/public/css')));
+app.use('/js', express.static(path.join(__dirname, '../src/public/js')));
+
+// ===== Rotas para páginas HTML =====
+app.get('/cadastro.html', (_req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../src/views/cadastro.html'));
+});
+
+app.get('/dashboard.html', (_req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../src/views/dashboard.html'));
+});
+
+app.get('/', (_req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../public/html/index.html'));
+});
+
+app.get('/mongo-explorer', (_req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../public/html/mongo-explorer.html'));
+});
 
 // ===== MongoDB Connection =====
 mongoDBService.connect().catch(console.error);

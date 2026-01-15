@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Automation Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status {
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .status h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .console {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .console-line {
+            margin-bottom: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 LinkedIn Automation</h1>
+            <p>Sistema de Automação e Targeting Inteligente</p>
+        </div>
+        
+        <div class="grid">
+            <!-- Posts Automáticos -->
+            <div class="card">
+                <h2>📝 Posts Automáticos</h2>
+                <p>Publicar conteúdo estratégico automaticamente</p>
+                <button class="btn btn-primary" onclick="executeAction('post-project')">
+                    Postar Projeto
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('post-job')">
+                    Postar Procura Emprego
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('post-learning')">
+                    Postar Aprendizado
+                </button>
+            </div>
+            
+            <!-- Targeting -->
+            <div class="card">
+                <h2>🎯 Targeting Estratégico</h2>
+                <p>Conectar com pessoas certas</p>
+                <button class="btn btn-primary" onclick="executeAction('recruiters')">
+                    Recrutadores BMW
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('techleads')">
+                    Tech Leads
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('rust-devs')">
+                    Desenvolvedores Rust
+                </button>
+            </div>
+            
+            <!-- Engagement -->
+            <div class="card">
+                <h2>💬 Engagement</h2>
+                <p>Interagir com conteúdo relevante</p>
+                <button class="btn btn-primary" onclick="executeAction('engage-bmw')">
+                    Engajar com BMW
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('engage-mercedes')">
+                    Engajar com Mercedes
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('followup')">
+                    Follow-up Automático
+                </button>
+            </div>
+            
+            <!-- Campanhas -->
+            <div class="card">
+                <h2>🚀 Campanhas</h2>
+                <p>Executar campanhas completas automatizadas</p>
+                <button class="btn btn-primary" onclick="executeAction('bmw-campaign')">
+                    Campanha BMW (5 dias)
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('weekly-campaign')">
+                    Campanha Semanal
+                </button>
+                <button class="btn btn-danger" onclick="executeAction('stop-campaign')">
+                    Parar Campanhas
+                </button>
+            </div>
+            
+            <!-- Analytics -->
+            <div class="card">
+                <h2>📊 Analytics</h2>
+                <p>Monitorar performance e resultados</p>
+                <button class="btn btn-primary" onclick="executeAction('report')">
+                    Relatório Semanal
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('analytics')">
+                    Analytics Completo
+                </button>
+                <button class="btn btn-secondary" onclick="executeAction('export-data')">
+                    Exportar Dados
+                </button>
+            </div>
+            
+            <!-- Configurações -->
+            <div class="card">
+                <h2>⚙️ Configurações</h2>
+                <p>Ajustar sistema e credenciais</p>
+                <button class="btn btn-primary" onclick="openConfig()">
+                    Editar .env
+                </button>
+                <button class="btn btn-secondary" onclick="testConnection()">
+                    Testar Conexão
+                </button>
+                <button class="btn btn-secondary" onclick="viewLogs()">
+                    Ver Logs
+                </button>
+            </div>
+        </div>
+        
+        <!-- Status -->
+        <div class="status">
+            <h3>📈 Status do Sistema</h3>
+            <div class="status-item">
+                <span>LinkedIn API</span>
+                <span class="badge badge-success" id="api-status">Conectado</span>
+            </div>
+            <div class="status-item">
+                <span>Última Ação</span>
+                <span id="last-action">Nenhuma ainda</span>
+            </div>
+            <div class="status-item">
+                <span>Posts Esta Semana</span>
+                <span class="badge badge-info" id="posts-count">0</span>
+            </div>
+            <div class="status-item">
+                <span>Novas Conexões</span>
+                <span class="badge badge-info" id="connections-count">0</span>
+            </div>
+            <div class="status-item">
+                <span>Campanha Ativa</span>
+                <span class="badge badge-warning" id="campaign-status">Nenhuma</span>
+            </div>
+        </div>
+        
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: white; margin-top: 15px;">Executando ação...</p>
+        </div>
+        
+        <!-- Console -->
+        <div class="console" id="console">
+            <div class="console-line">🚀 LinkedIn Automation System v1.0</div>
+            <div class="console-line">✅ Sistema pronto para uso</div>
+            <div class="console-line">ℹ️ Aguardando comandos...</div>
+        </div>
+    </div>
+    
+    <script>
+        let consoleLines = [];
+        
+        function addConsoleLog(message, type = 'info') {
+            const console = document.getElementById('console');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            
+            const icon = type === 'success' ? '✅' : 
+                        type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            line.textContent = `${icon} ${new Date().toLocaleTimeString()} - ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+            
+            consoleLines.push({ message, type, timestamp: new Date() });
+        }
+        
+        async function executeAction(action) {
+            const loading = document.getElementById('loading');
+            loading.classList.add('active');
+            
+            addConsoleLog(`Executando: ${action}`, 'info');
+            
+            try {
+                // Simular chamada para backend
+                const response = await fetch('/api/linkedin-automation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    addConsoleLog(`${action} executado com sucesso!`, 'success');
+                    updateStatus(action);
+                } else {
+                    addConsoleLog(`Erro ao executar ${action}: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addConsoleLog(`Erro de conexão: ${error.message}`, 'error');
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+        
+        function updateStatus(action) {
+            document.getElementById('last-action').textContent = action;
+            
+            // Atualizar contadores (simulado)
+            const postsCount = document.getElementById('posts-count');
+            if (action.includes('post')) {
+                postsCount.textContent = parseInt(postsCount.textContent) + 1;
+            }
+            
+            const connectionsCount = document.getElementById('connections-count');
+            if (action.includes('recruiter') || action.includes('techlead')) {
+                connectionsCount.textContent = parseInt(connectionsCount.textContent) + 5;
+            }
+            
+            if (action.includes('campaign')) {
+                document.getElementById('campaign-status').textContent = 'BMW (Ativa)';
+                document.getElementById('campaign-status').className = 'badge badge-success';
+            }
+        }
+        
+        function openConfig() {
+            addConsoleLog('Abrindo configurações...', 'info');
+            // Abrir .env em editor
+            alert('Edite o arquivo .env na raiz do projeto com suas credenciais LinkedIn');
+        }
+        
+        async function testConnection() {
+            addConsoleLog('Testando conexão com LinkedIn API...', 'info');
+            
+            try {
+                // Testar conexão
+                const response = await fetch('/api/linkedin-test');
+                const result = await response.json();
+                
+                if (result.connected) {
+                    addConsoleLog('Conexão OK! ✅', 'success');
+                    document.getElementById('api-status').textContent = 'Conectado';
+                    document.getElementById('api-status').className = 'badge badge-success';
+                } else {
+                    addConsoleLog('Erro de conexão! Verifique credenciais.', 'error');
+                    document.getElementById('api-status').textContent = 'Erro';
+                    document.getElementById('api-status').className = 'badge badge-danger';
+                }
+            } catch (error) {
+                addConsoleLog(`Erro: ${error.message}`, 'error');
+            }
+        }
+        
+        function viewLogs() {
+            addConsoleLog('Exibindo logs completos...', 'info');
+            // Mostrar histórico completo
+            const logs = consoleLines.map(log => 
+                `[${log.timestamp.toLocaleString()}] ${log.type.toUpperCase()}: ${log.message}`
+            ).join('\n');
+            
+            alert(logs || 'Nenhum log ainda');
+        }
+        
+        // Atualizar status a cada 5 segundos
+        setInterval(async () => {
+            try {
+                const response = await fetch('/api/linkedin-status');
+                const status = await response.json();
+                
+                document.getElementById('posts-count').textContent = status.postsThisWeek || 0;
+                document.getElementById('connections-count').textContent = status.newConnections || 0;
+            } catch (error) {
+                // Silenciosamente falhar
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

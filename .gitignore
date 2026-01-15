@@ -50,11 +50,21 @@ build/
 *.tgz
 
 # ==========================================
-# Temporary Files
+# Temporary Files & Tests
 # ==========================================
 tmp/
 temp/
 *.tmp
+test-*.js
+playground-*.mongodb.js
+delete_databases.cjs
+
+# ==========================================
+# Executables & Archives
+# ==========================================
+*.exe
+*.zip
+*.tar.gz
 
 # ==========================================
 # Database
