@@ -3,7 +3,7 @@
   "version": "2.1.0",
   "description": "Backend para Avila Dashboard - Integração com todos os serviços (Estrutura Reorganizada)",
   "type": "module",
-  "main": "dist/server.js",
+  "main": "server.js",
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
