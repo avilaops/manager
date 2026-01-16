@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: avila-manager
+    runtime: node
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: NODE_ENV
+        value: production
+      - key: RENDER
+        value: true

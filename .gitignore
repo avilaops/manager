@@ -1,0 +1,100 @@
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.env
+server.js
+server_clean.js
+server.refactored.js
+
+# ==========================================
+# Node.js
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ==========================================
+# Logs
+# ==========================================
+logs/
+*.log
+combined.log
+error.log
+
+# ==========================================
+# OS Files
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# IDE & Editor
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==========================================
+# Build & Distribution
+# ==========================================
+dist/
+build/
+*.tgz
+
+# ==========================================
+# Temporary Files & Tests
+# ==========================================
+tmp/
+temp/
+*.tmp
+test-*.js
+playground-*.mongodb.js
+delete_databases.cjs
+
+# ==========================================
+# Executables & Archives
+# ==========================================
+*.exe
+*.zip
+*.tar.gz
+
+# ==========================================
+# Database
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# Backups
+# ==========================================
+*.bak
+*.backup
+data/backups/
+!data/backups/.gitkeep
+
+# ==========================================
+# Sensitive Data
+# ==========================================
+/Extrato-bancario/*.csv
+/contacts/*.vcf
+credentials.json
+secrets.json
+
+# ==========================================
+# Large Files
+# ==========================================
+AI-ML/
+Assets/
+
+# Visual Studio
+.vs/
+*.vsidx
