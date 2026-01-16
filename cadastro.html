@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Begin Your Journey - Avila</title>
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Avx" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css" />
+    <script>
+        // Verificar autenticação
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(29, 78, 216, 0.15), transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15), transparent 50%),
+                        radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.15), transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        
+        .container {
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            max-width: 540px;
+            width: 100%;
+            padding: 48px;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+            color: white;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+        }
+        
+        .header p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.15s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+        .form-group:nth-child(4) { animation-delay: 0.25s; }
+        .form-group:nth-child(5) { animation-delay: 0.3s; }
+        .form-group:nth-child(6) { animation-delay: 0.35s; }
+        .form-group:nth-child(7) { animation-delay: 0.4s; }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: -0.2px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 20px;
+            transition: color 0.3s;
+            pointer-events: none;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: inherit;
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1),
+                        0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .form-group input:focus ~ .input-icon,
+        .form-group select:focus ~ .input-icon {
+            color: rgba(102, 126, 234, 0.8);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+            padding: 14px 16px 14px 48px;
+        }
+        
+        .form-group select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+        
+        .form-group select option {
+            background: #1e293b;
+            color: white;
+            padding: 10px;
+        }
+        
+        .input-valid {
+            border-color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.05) !important;
+        }
+        
+        .input-invalid {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.05) !important;
+        }
+        
+        .validation-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .validation-icon.show {
+            opacity: 1;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-top: 32px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .submit-btn i {
+            font-size: 20px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .submit-btn.loading {
+            background: linear-gradient(90deg, 
+                #667eea 0%, 
+                #764ba2 25%, 
+                #667eea 50%, 
+                #764ba2 75%, 
+                #667eea 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+        
+        .privacy-notice {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            margin-top: 20px;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+        }
+        
+        /* Patent Verification Section */
+        .patent-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .patent-section.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .patent-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .patent-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .patent-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+        }
+        
+        .patent-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .patent-option {
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .patent-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .patent-option.selected {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .patent-option i {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: #667eea;
+        }
+        
+        .patent-option h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: white;
+        }
+        
+        .patent-option p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .patent-fields {
+            display: none;
+            margin-top: 24px;
+        }
+        
+        .patent-fields.show {
+            display: block;
+        }
+        
+        .file-upload-area {
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload-area:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+        
+        .file-upload-area.dragging {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+        }
+        
+        .file-upload-area i {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 16px;
+        }
+        
+        .file-upload-area h3 {
+            color: white;
+            margin-bottom: 8px;
+        }
+        
+        .file-upload-area p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+        
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+        
+        .file-name {
+            margin-top: 16px;
+            color: #10b981;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .skip-patent {
+            text-align: center;
+            margin-top: 24px;
+        }
+        
+        .skip-patent button {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .skip-patent button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Initial Form -->
+        <div id="initialForm">
+            <div class="header">
+                <div class="logo">
+                    <i class="iconoir-flash"></i>
+                </div>
+                <h1>Begin Your Journey</h1>
+                <p>Transform your vision into reality with our premium solutions</p>
+            </div>
+            
+            <form id="cadastroForm">
+                <div class="form-group">
+                    <label for="nome">Full Name *</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-user input-icon"></i>
+                        <input type="text" id="nome" name="nome" placeholder="John Doe" required autocomplete="name">
+                        <span class="validation-icon" id="nomeIcon"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="empresa">Company Name</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-building input-icon"></i>
+                        <input type="text" id="empresa" name="empresa" placeholder="Acme Inc." autocomplete="organization">
+                        <span class="validation-icon" id="empresaIcon"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-mail input-icon"></i>
+                        <input type="email" id="email" name="email" placeholder="john@company.com" required autocomplete="email">
+                        <span class="validation-icon" id="emailIcon"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefone">Phone / WhatsApp</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-phone input-icon"></i>
+                        <input type="tel" id="telefone" name="telefone" placeholder="+1 (555) 000-0000" autocomplete="tel">
+                        <span class="validation-icon" id="telefoneIcon"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoProjeto">Project Type *</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-code input-icon"></i>
+                        <select id="tipoProjeto" name="tipoProjeto" required>
+                            <option value="">Select a type...</option>
+                            <option value="Website">Website / Landing Page</option>
+                            <option value="E-commerce">E-commerce Platform</option>
+                            <option value="Web App">Web Application</option>
+                            <option value="Mobile App">Mobile App (iOS/Android)</option>
+                            <option value="Dashboard">Dashboard / Admin Panel</option>
+                            <option value="API">API / Backend System</option>
+                            <option value="AI/ML">AI / Machine Learning</option>
+                            <option value="Blockchain">Blockchain / Web3</option>
+                            <option value="Outro">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="orcamento">Budget Range</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-dollar input-icon"></i>
+                        <select id="orcamento" name="orcamento">
+                            <option value="">Select budget...</option>
+                            <option value="< $5K">Under $5,000</option>
+                            <option value="$5K - $10K">$5,000 - $10,000</option>
+                            <option value="$10K - $25K">$10,000 - $25,000</option>
+                            <option value="$25K - $50K">$25,000 - $50,000</option>
+                            <option value="$50K - $100K">$50,000 - $100,000</option>
+                            <option value="> $100K">Over $100,000</option>
+                            <option value="Flexible">Flexible / To Discuss</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descricao">Tell us about your vision</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-edit-pencil input-icon" style="top: 20px;"></i>
+                        <textarea id="descricao" name="descricao" rows="4" placeholder="Describe your project goals, challenges, and what success looks like..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="indicacao">Como nos conheceu?</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-user-star input-icon"></i>
+                        <select id="indicacao" name="indicacao">
+                            <option value="">Selecione...</option>
+                            <option value="Google">Google / Busca Online</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Indicacao">Indicação de conhecido</option>
+                            <option value="Cliente">Cliente anterior</option>
+                            <option value="Evento">Evento / Networking</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomeIndicacao">Nome de quem indicou (se aplicável)</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-user input-icon"></i>
+                        <input type="text" id="nomeIndicacao" name="nomeIndicacao" placeholder="Ex: João Silva">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observacoes">Observações adicionais</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-notes input-icon" style="top: 20px;"></i>
+                        <textarea id="observacoes" name="observacoes" rows="3" placeholder="Informações extras, prazos especiais, requisitos específicos..."></textarea>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="iconoir-rocket"></i> Start Your Project
+                </button>
+                
+                <div class="privacy-notice">
+                    <i class="iconoir-lock"></i> Your data is encrypted and securely stored
+                </div>
+            </form>
+        </div>
+        
+        <!-- Patent Verification Section -->
+        <div id="patentSection" class="patent-section">
+            <div class="patent-header">
+                <h2>Company Patent Verification</h2>
+                <p>Help us verify your company's intellectual property</p>
+            </div>
+            
+            <div class="patent-options">
+                <div class="patent-option" id="optionYes" onclick="selectPatentOption('yes')">
+                    <i class="iconoir-verified-badge"></i>
+                    <h3>Yes, Patented</h3>
+                    <p>Company has patent</p>
+                </div>
+                <div class="patent-option" id="optionNo" onclick="selectPatentOption('no')">
+                    <i class="iconoir-cancel"></i>
+                    <h3>Not Patented</h3>
+                    <p>No patent registered</p>
+                </div>
+            </div>
+            
+            <!-- Patent Upload/Number Fields -->
+            <div id="patentFields" class="patent-fields">
+                <div class="form-group">
+                    <label for="patentNumber">Patent Number</label>
+                    <div class="input-wrapper">
+                        <i class="iconoir-hashtag input-icon"></i>
+                        <input type="text" id="patentNumber" placeholder="US1234567, EP2345678, BR102021000001, etc.">
+                        <span class="validation-icon" id="patentNumberIcon"></span>
+                    </div>
+                    <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 8px;">
+                        Enter patent number or upload document below
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Patent Document (Optional)</label>
+                    <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('patentFile').click()">
+                        <i class="iconoir-cloud-upload"></i>
+                        <h3>Drop file here or click to upload</h3>
+                        <p>PDF, DOC, DOCX (Max 10MB)</p>
+                        <input type="file" id="patentFile" accept=".pdf,.doc,.docx" onchange="handleFileSelect(event)">
+                        <div class="file-name" id="fileName"></div>
+                    </div>
+                </div>
+                
+                <button type="button" class="submit-btn" id="verifyPatentBtn" onclick="verifyPatent()">
+                    <i class="iconoir-verified-badge"></i> Verify Patent
+                </button>
+            </div>
+            
+            <div class="skip-patent">
+                <button type="button" onclick="skipPatent()">
+                    <i class="iconoir-arrow-right"></i> Skip This Step
+                </button>
+            </div>
+        </div>
+        
+        <div id="successMessage" style="display: none; text-align: center; padding: 40px;"></div>
+        <div id="errorMessage" style="display: none; padding: 12px; background: #fee2e2; color: #991b1b; border-radius: 8px; margin-top: 16px; text-align: center;"></div>
+    </div>
+    
+    <script>
+        // Store lead ID for patent verification
+        let currentLeadId = null;
+        
+        // Patent option selection
+        function selectPatentOption(option) {
+            const optionYes = document.getElementById('optionYes');
+            const optionNo = document.getElementById('optionNo');
+            const patentFields = document.getElementById('patentFields');
+            
+            if (option === 'yes') {
+                optionYes.classList.add('selected');
+                optionNo.classList.remove('selected');
+                patentFields.classList.add('show');
+            } else {
+                optionNo.classList.add('selected');
+                optionYes.classList.remove('selected');
+                patentFields.classList.remove('show');
+                // Skip to success if no patent
+                skipPatent();
+            }
+        }
+        
+        // File upload handling
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        
+        ['dragover', 'dragenter'].forEach(event => {
+            fileUploadArea.addEventListener(event, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fileUploadArea.classList.add('dragging');
+            });
+        });
+        
+        ['dragleave', 'dragend'].forEach(event => {
+            fileUploadArea.addEventListener(event, () => {
+                fileUploadArea.classList.remove('dragging');
+            });
+        });
+        
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fileUploadArea.classList.remove('dragging');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('patentFile').files = files;
+                handleFileSelect({ target: { files } });
+            }
+        });
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const fileName = document.getElementById('fileName');
+                fileName.textContent = `✓ ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+            }
+        }
+        
+        // Verify patent
+        async function verifyPatent() {
+            const patentNumber = document.getElementById('patentNumber').value.trim();
+            const patentFile = document.getElementById('patentFile').files[0];
+            const verifyBtn = document.getElementById('verifyPatentBtn');
+            
+            if (!patentNumber && !patentFile) {
+                alert('⚠️ Please enter a patent number or upload a document');
+                return;
+            }
+            
+            // Show loading
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<i class="iconoir-refresh" style="animation: spin 1s linear infinite;"></i> Verifying...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('leadId', currentLeadId);
+                formData.append('patentNumber', patentNumber);
+                if (patentFile) {
+                    formData.append('patentFile', patentFile);
+                }
+                
+                const response = await fetch('http://localhost:3000/api/crm/leads/patent/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess();
+                } else {
+                    throw new Error(data.error || 'Verification failed');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<i class="iconoir-verified-badge"></i> Verify Patent';
+            }
+        }
+        
+        // Skip patent verification
+        async function skipPatent() {
+            try {
+                if (currentLeadId) {
+                    await fetch(`http://localhost:3000/api/crm/leads/${currentLeadId}/patent/skip`, {
+                        method: 'POST'
+                    });
+                }
+                showSuccess();
+            } catch (error) {
+                console.error('Skip patent error:', error);
+                showSuccess(); // Show success anyway
+            }
+        }
+        
+        // Show final success
+        function showSuccess() {
+            document.getElementById('patentSection').style.display = 'none';
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'block';
+            successMessage.innerHTML = `
+                <i class="iconoir-check-circle" style="font-size: 64px; color: #10b981; margin-bottom: 24px;"></i>
+                <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 16px; color: white;">All Set!</h2>
+                <p style="color: rgba(255,255,255,0.6); font-size: 16px; margin-bottom: 32px;">
+                    Your information has been received. We'll contact you shortly.
+                </p>
+                <button onclick="location.reload()" class="submit-btn" style="max-width: 300px; margin: 0 auto;">
+                    <i class="iconoir-plus"></i> Submit Another Project
+                </button>
+            `;
+        }
+        
+        // Form validation
+        const inputs = {
+            nome: document.getElementById('nome'),
+            empresa: document.getElementById('empresa'),
+            email: document.getElementById('email'),
+            telefone: document.getElementById('telefone')
+        };
+        
+        const icons = {
+            nome: document.getElementById('nomeIcon'),
+            empresa: document.getElementById('empresaIcon'),
+            email: document.getElementById('emailIcon'),
+            telefone: document.getElementById('telefoneIcon')
+        };
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        function validateInput(inputName, value) {
+            const input = inputs[inputName];
+            const icon = icons[inputName];
+            
+            let isValid = false;
+            
+            if (inputName === 'email') {
+                isValid = emailRegex.test(value);
+            } else if (inputName === 'nome') {
+                isValid = value.trim().length >= 3;
+            } else {
+                isValid = value.trim().length > 0;
+            }
+            
+            if (isValid) {
+                input.classList.remove('input-invalid');
+                input.classList.add('input-valid');
+                icon.classList.add('show');
+                icon.textContent = '✓';
+                icon.style.color = '#10b981';
+            } else if (value.length > 0) {
+                input.classList.remove('input-valid');
+                input.classList.add('input-invalid');
+                icon.classList.add('show');
+                icon.textContent = '✗';
+                icon.style.color = '#ef4444';
+            } else {
+                input.classList.remove('input-valid', 'input-invalid');
+                icon.classList.remove('show');
+            }
+        }
+        
+        // Add real-time validation to inputs
+        Object.keys(inputs).forEach(key => {
+            inputs[key].addEventListener('input', (e) => {
+                validateInput(key, e.target.value);
+            });
+            
+            inputs[key].addEventListener('blur', (e) => {
+                validateInput(key, e.target.value);
+            });
+        });
+        
+        // Form submission
+        const form = document.getElementById('cadastroForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '<i class="iconoir-refresh" style="animation: spin 1s linear infinite;"></i> Processing...';
+            
+            const formData = {
+                nome: inputs.nome.value,
+                empresa: inputs.empresa.value,
+                email: inputs.email.value,
+                telefone: inputs.telefone.value,
+                tipoProjeto: document.getElementById('tipoProjeto').value,
+                orcamento: document.getElementById('orcamento').value,
+                descricao: document.getElementById('descricao').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/crm/leads/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store lead ID for patent verification
+                    currentLeadId = data.leadId;
+                    
+                    // Hide initial form, show patent section
+                    document.getElementById('initialForm').style.display = 'none';
+                    const patentSection = document.getElementById('patentSection');
+                    patentSection.style.display = 'block';
+                    setTimeout(() => patentSection.classList.add('show'), 100);
+                    
+                    // Reset form
+                    form.reset();
+                    Object.values(inputs).forEach(input => {
+                        input.classList.remove('input-valid', 'input-invalid');
+                    });
+                    Object.values(icons).forEach(icon => {
+                        icon.classList.remove('show');
+                    });
+                    
+                    // Reset button
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('loading');
+                    submitBtn.innerHTML = '<i class="iconoir-rocket"></i> Start Your Project';
+                } else {
+                    throw new Error(data.error || 'Submission failed');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = '❌ ' + error.message;
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+                submitBtn.innerHTML = '<i class="iconoir-refresh"></i> Try Again';
+                
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                    submitBtn.innerHTML = '<i class="iconoir-rocket"></i> Start Your Project';
+                }, 3000);
+            }
+        });
+        
+        // Add smooth focus transitions
+        const allInputs = form.querySelectorAll('input, select, textarea');
+        allInputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.style.transform = 'scale(1.01)';
+            });
+            
+            input.addEventListener('blur', () => {
+                input.parentElement.style.transform = '';
+            });
+        });
+    </script>
+</body>
+</html>
